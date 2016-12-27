@@ -7,16 +7,17 @@ import Data.Monoid ((<>))
 import SqlTypes
 import Data.Aeson (FromJSON, ToJSON, encode)
 import GHC.Generics
+import Database.SQLite.Simple
 import qualified Data.ByteString.Lazy.Char8 as BS
 
 maciek :: User
-maciek = User { userId = 1, firstName = "maciek", lastName = "freeman" }
+maciek = User { userId = 1, firstName = "maciek", lastName = "freeman", teamId = 1 }
 
 morgan :: User
-morgan = User { userId = 2, firstName = "morgan", lastName = "freeman" }
+morgan = User { userId = 2, firstName = "morgan", lastName = "freeman", teamId = 2 }
 
 alex :: User
-alex = User { userId = 3, firstName = "alex", lastName = "freeman" }
+alex = User { userId = 3, firstName = "alex", lastName = "freeman", teamId = 4 }
 
 allUsers :: [User]
 allUsers = [maciek, morgan, alex]
@@ -44,6 +45,7 @@ helloName name = do
     text ("hello " <> name <> " :*")
 
 main = do
-    putStrLn(firstName maciek)
-    BS.putStrLn(encode maciek)
+    conn <- open "data.db"
+    mapM_ print =<< ( query_ conn "select 2 + 2" :: IO [Only Int] )
+    mapM_ print =<< ( query_ conn "select * from users" :: IO [User] )
     scotty 3000 routes
