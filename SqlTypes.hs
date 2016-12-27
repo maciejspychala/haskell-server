@@ -6,8 +6,8 @@ import Data.Aeson (FromJSON, ToJSON, encode)
 import Database.SQLite.Simple
 
 data User = User { userId :: Int,
-    lastName :: String,
     firstName :: String,
+    lastName :: String,
     teamId :: Int } deriving (Show, Generic) 
 
 
