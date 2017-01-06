@@ -5,6 +5,8 @@ import GHC.Generics
 import Data.Aeson (FromJSON, ToJSON, encode)
 import Database.SQLite.Simple
 
+
+
 data User = User { userId :: Int,
     firstName :: String,
     lastName :: String,
