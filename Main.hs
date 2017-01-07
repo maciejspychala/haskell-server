@@ -3,10 +3,11 @@
 
 import Web.Scotty
 import qualified Data.Text.Lazy as TL
+import Data.Text.Lazy.Encoding (decodeUtf8)
 import Data.Monoid ((<>))
 import Control.Monad.IO.Class
 import SqlTypes
-import Data.Aeson (FromJSON, ToJSON, encode)
+import Data.Aeson (FromJSON, ToJSON, encode, decode)
 import GHC.Generics
 import Database.SQLite.Simple
 import Database.SQLite.Simple.ToField
@@ -15,12 +16,9 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 getUserQuery = "select id, first_name, second_name, team from users"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
 
-maciek :: User
-maciek = User {userId = 1, firstName = "maciek", lastName = "freeman", teamId = 3 }
 
 instance ToRow User where
     toRow a = [toField (userId a)]
-
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -32,6 +30,9 @@ routes conn = do
     get "/users" $ do
         users <- liftIO ( query_ conn getUserQuery :: IO [User] )
         json users
+    put "/users" $ do
+        b <- jsonData :: ActionM User
+        json b
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
         users <- liftIO ( (query conn "select id, first_name, second_name, team from users where id = (?)" (Only id) ):: IO [User] )
