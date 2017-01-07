@@ -15,10 +15,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 
 getUserQuery = "select id, first_name, second_name, team from users"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
-
-
-instance ToRow User where
-    toRow a = [toField (userId a)]
+insertUser = "insert into users (first_name, second_name, team) values (?, ?, ?)"
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -32,10 +29,11 @@ routes conn = do
         json users
     put "/users" $ do
         b <- jsonData :: ActionM User
+        liftIO (execute conn insertUser b)
         json b
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        users <- liftIO ( (query conn "select id, first_name, second_name, team from users where id = (?)" (Only id) ):: IO [User] )
+        users <- liftIO ( (query conn getUserQueryId (Only id) ):: IO [User] )
         json ( head users )
 
 

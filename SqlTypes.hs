@@ -6,6 +6,8 @@ module SqlTypes  where
 import GHC.Generics
 import Data.Aeson (parseJSON, FromJSON, ToJSON, encode, decode, (.:), (.:?), Value(..))
 import Database.SQLite.Simple
+import Database.SQLite.Simple.ToRow
+import Database.SQLite.Simple.ToField
 
 
 
@@ -26,3 +28,8 @@ instance ToJSON User
 
 instance FromRow User where
     fromRow = User <$> field <*> field <*> field <*> field 
+
+instance ToRow User where
+    toRow u = [toField (firstName u), toField (lastName u), toField (teamId u)]
+
+
