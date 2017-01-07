@@ -15,7 +15,8 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 
 getUserQuery = "select id, first_name, second_name, team from users"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
-insertUser = "insert into users (first_name, second_name, team) values (?, ?, ?)"
+insertUserQuery = "insert into users (first_name, second_name, team) values (?, ?, ?)"
+updateUserQuery = "update users set first_name = (?), second_name = (?), team = (?) where id = (?)"
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -25,16 +26,16 @@ routes conn = do
         name <- param "name"
         helloName name
     get "/users" $ do
-        users <- liftIO ( query_ conn getUserQuery :: IO [User] )
+        users <- liftIO (getUsers conn)
         json users
     put "/users" $ do
-        b <- jsonData :: ActionM User
-        liftIO (execute conn insertUser b)
-        json b
+        user <- jsonData :: ActionM User
+        liftIO (insertUser conn user)
+        json user
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        users <- liftIO ( (query conn getUserQueryId (Only id) ):: IO [User] )
-        json ( head users )
+        user <- liftIO (getUser conn id)
+        json user
 
 
 hello :: ActionM ()
@@ -44,6 +45,22 @@ hello = do
 helloName :: TL.Text -> ActionM ()
 helloName name = do
     text ("hello " <> name <> " :*")
+
+getUsers :: Connection -> IO [User]
+getUsers conn = do
+    users <- query_ conn getUserQuery :: IO [User]
+    return users
+
+getUser :: Connection -> TL.Text -> IO User
+getUser conn id = do
+    users <- query conn getUserQueryId (Only id) :: IO [User]
+    return (head users)
+
+insertUser :: Connection -> User -> IO ()
+insertUser conn user = do
+    if null $ userId user 
+        then execute conn insertUserQuery user
+        else execute conn updateUserQuery (firstName user, lastName user, teamId user, userId user)
 
 main = do
     conn <- open "data.db"
