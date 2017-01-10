@@ -5,10 +5,10 @@ module SqlTypes  where
 
 import GHC.Generics
 import Data.Aeson (parseJSON, FromJSON, ToJSON, encode, decode, (.:), (.:?), Value(..))
-import Database.SQLite.Simple
-import Database.SQLite.Simple.ToRow
-import Database.SQLite.Simple.ToField
-
+import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.ToRow
+import Database.PostgreSQL.Simple.FromRow
+import Database.PostgreSQL.Simple.ToField
 
 
 data User = User { userId :: Maybe Int,
@@ -32,4 +32,18 @@ instance FromRow User where
 instance ToRow User where
     toRow u = [toField (firstName u), toField (lastName u), toField (teamId u)]
 
+data Team = Team { teamIda:: Int,
+    name :: String } deriving (Show, Generic) 
 
+instance FromJSON Team where
+    parseJSON (Object v) = Team <$>
+        v .: "teamId" <*>
+        v .: "name"
+
+instance ToJSON Team
+
+instance FromRow Team where
+    fromRow = Team <$> field <*> field 
+
+instance ToRow Team where
+    toRow u = [toField (teamIda u), toField (name u)]

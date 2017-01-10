@@ -6,14 +6,17 @@ import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import Data.Monoid ((<>))
 import Control.Monad.IO.Class
+import Data.Int
 import SqlTypes
 import Data.Aeson (FromJSON, ToJSON, encode, decode)
 import GHC.Generics
-import Database.SQLite.Simple
-import Database.SQLite.Simple.ToField
+import Database.PostgreSQL.Simple
+import Database.PostgreSQL.Simple.ToField
 import qualified Data.ByteString.Lazy.Char8 as BS
+import qualified Data.ByteString.Char8 as IBS
 
 getUserQuery = "select id, first_name, second_name, team from users"
+getTeamQuery = "select id, name from teams"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
 insertUserQuery = "insert into users (first_name, second_name, team) values (?, ?, ?)"
 updateUserQuery = "update users set first_name = (?), second_name = (?), team = (?) where id = (?)"
@@ -56,12 +59,16 @@ getUser conn id = do
     users <- query conn getUserQueryId (Only id) :: IO [User]
     return (head users)
 
-insertUser :: Connection -> User -> IO ()
+insertUser :: Connection -> User -> IO Int64
 insertUser conn user = do
     if null $ userId user 
         then execute conn insertUserQuery user
         else execute conn updateUserQuery (firstName user, lastName user, teamId user, userId user)
 
+
 main = do
-    conn <- open "data.db"
+    x <- readFile "credentials.safe"
+    let [username,  password] = words x
+    conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (IBS.pack username) <> 
+        "' dbname='maciek' password='" <> (IBS.pack password) <> "'")
     scotty 3000 (routes conn)
