@@ -14,7 +14,7 @@ import Database.PostgreSQL.Simple.ToField
 data User = User { userId :: Maybe Int,
     firstName :: String,
     lastName :: String,
-    teamId :: Int } deriving (Show, Generic) 
+    team :: Int } deriving (Show, Generic) 
 
 
 instance FromJSON User where
@@ -22,7 +22,7 @@ instance FromJSON User where
         v .:? "userId" <*>
         v .: "firstName" <*>
         v .: "lastName" <*>
-        v .: "teamId"
+        v .: "team"
 
 instance ToJSON User
 
@@ -30,9 +30,9 @@ instance FromRow User where
     fromRow = User <$> field <*> field <*> field <*> field 
 
 instance ToRow User where
-    toRow u = [toField (firstName u), toField (lastName u), toField (teamId u)]
+    toRow u = [toField (firstName u), toField (lastName u), toField (team u)]
 
-data Team = Team { teamIda:: Int,
+data Team = Team { teamId:: Int,
     name :: String } deriving (Show, Generic) 
 
 instance FromJSON Team where
@@ -46,4 +46,4 @@ instance FromRow Team where
     fromRow = Team <$> field <*> field 
 
 instance ToRow Team where
-    toRow u = [toField (teamIda u), toField (name u)]
+    toRow u = [toField (teamId u), toField (name u)]

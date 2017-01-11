@@ -15,8 +15,8 @@ import Database.PostgreSQL.Simple.ToField
 import qualified Data.ByteString.Lazy.Char8 as BS
 import qualified Data.ByteString.Char8 as IBS
 
-getUserQuery = "select id, first_name, second_name, team from users"
-getTeamQuery = "select id, name from teams"
+getUsersQuery = "select id, first_name, second_name, team from users"
+getTeamsQuery = "select id, name from teams"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
 insertUserQuery = "insert into users (first_name, second_name, team) values (?, ?, ?)"
 updateUserQuery = "update users set first_name = (?), second_name = (?), team = (?) where id = (?)"
@@ -39,6 +39,9 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         user <- liftIO (getUser conn id)
         json user
+    get "/teams" $ do
+        teams <- liftIO (getTeams conn)
+        json teams
 
 
 hello :: ActionM ()
@@ -51,8 +54,13 @@ helloName name = do
 
 getUsers :: Connection -> IO [User]
 getUsers conn = do
-    users <- query_ conn getUserQuery :: IO [User]
+    users <- query_ conn getUsersQuery :: IO [User]
     return users
+
+getTeams :: Connection -> IO [Team]
+getTeams conn = do
+    teams <- query_ conn getTeamsQuery :: IO [Team]
+    return teams
 
 getUser :: Connection -> TL.Text -> IO User
 getUser conn id = do
@@ -63,7 +71,7 @@ insertUser :: Connection -> User -> IO Int64
 insertUser conn user = do
     if null $ userId user 
         then execute conn insertUserQuery user
-        else execute conn updateUserQuery (firstName user, lastName user, teamId user, userId user)
+        else execute conn updateUserQuery (firstName user, lastName user, team user, userId user)
 
 
 main = do

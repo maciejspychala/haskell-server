@@ -14,3 +14,14 @@ insert into users (first_name, second_name, team) values
 ('wieslaw', 'aramewicz', 3),
 ('kasia', 'bolera', 2);
 
+create table teams (
+    id bigserial primary key not null,
+    name varchar(40)
+);
+
+insert into teams (name) values
+('frontend'),
+('backend'),
+('design'),
+('marketing'),
+('management');
