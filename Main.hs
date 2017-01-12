@@ -20,6 +20,8 @@ getTeamsQuery = "select id, name from teams"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
 insertUserQuery = "insert into users (first_name, second_name, team) values (?, ?, ?)"
 updateUserQuery = "update users set first_name = (?), second_name = (?), team = (?) where id = (?)"
+insertTeamQuery = "insert into teams (name) values (?)"
+updateTeamQuery = "update teams set name = (?) where id = (?)"
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -42,6 +44,10 @@ routes conn = do
     get "/teams" $ do
         teams <- liftIO (getTeams conn)
         json teams
+    put "/teams" $ do
+        team <- jsonData :: ActionM Team
+        liftIO (insertTeam conn team)
+        json team
 
 
 hello :: ActionM ()
@@ -73,6 +79,11 @@ insertUser conn user = do
         then execute conn insertUserQuery user
         else execute conn updateUserQuery (firstName user, lastName user, team user, userId user)
 
+insertTeam :: Connection -> Team -> IO Int64
+insertTeam conn team = do
+    if null $ teamId team 
+        then execute conn insertTeamQuery team
+        else execute conn updateTeamQuery (name team, teamId team)
 
 main = do
     x <- readFile "credentials.safe"

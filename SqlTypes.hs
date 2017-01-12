@@ -32,12 +32,12 @@ instance FromRow User where
 instance ToRow User where
     toRow u = [toField (firstName u), toField (lastName u), toField (team u)]
 
-data Team = Team { teamId:: Int,
+data Team = Team { teamId:: Maybe Int,
     name :: String } deriving (Show, Generic) 
 
 instance FromJSON Team where
     parseJSON (Object v) = Team <$>
-        v .: "teamId" <*>
+        v .:? "teamId" <*>
         v .: "name"
 
 instance ToJSON Team
