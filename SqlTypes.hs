@@ -9,6 +9,7 @@ import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToRow
 import Database.PostgreSQL.Simple.FromRow
 import Database.PostgreSQL.Simple.ToField
+import Data.Time.Clock
 
 
 data User = User { userId :: Maybe Int,
@@ -32,7 +33,7 @@ instance FromRow User where
 instance ToRow User where
     toRow u = [toField (firstName u), toField (lastName u), toField (team u)]
 
-data Team = Team { teamId:: Maybe Int,
+data Team = Team { teamId :: Maybe Int,
     name :: String } deriving (Show, Generic) 
 
 instance FromJSON Team where
@@ -47,3 +48,28 @@ instance FromRow Team where
 
 instance ToRow Team where
     toRow u = [toField (teamId u), toField (name u)]
+
+
+data Task = Task { taskId :: Maybe Int,
+    beginDate :: UTCTime,
+    endDate :: UTCTime,
+    exeqTeam :: Int,
+    description :: String } deriving (Show, Generic)
+
+
+instance FromRow Task where
+    fromRow = Task <$> field <*> field <*> field <*> field <*> field 
+
+instance ToRow Task where
+     toRow t = [toField (taskId t), toField (beginDate t),
+        toField (endDate t), toField (exeqTeam t), toField (description t)]
+
+instance ToJSON Task
+
+instance FromJSON Task where
+    parseJSON (Object v) = Task <$>
+        v .:? "taskId" <*>
+        v .: "beginDate" <*>
+        v .: "endDate" <*>
+        v .: "exeqTeam" <*>
+        v .: "description"

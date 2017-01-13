@@ -17,6 +17,7 @@ import qualified Data.ByteString.Char8 as IBS
 
 getUsersQuery = "select id, first_name, second_name, team from users"
 getTeamsQuery = "select id, name from teams"
+getTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks"
 getTeamQueryId = "select id, name from teams where id = (?)"
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)"
 insertUserQuery = "insert into users (first_name, second_name, team) values (?, ?, ?)"
@@ -53,6 +54,9 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         team <- liftIO (getTeam conn id)
         json team
+    get "/tasks" $ do
+        tasks <- liftIO (getTasks conn)
+        json tasks
 
 
 hello :: ActionM ()
@@ -72,6 +76,11 @@ getTeams :: Connection -> IO [Team]
 getTeams conn = do
     teams <- query_ conn getTeamsQuery :: IO [Team]
     return teams
+
+getTasks :: Connection -> IO [Task]
+getTasks conn = do
+    tasks <- query_ conn getTasksQuery :: IO [Task]
+    return tasks
 
 getUser :: Connection -> TL.Text -> IO User
 getUser conn id = do
