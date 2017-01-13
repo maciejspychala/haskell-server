@@ -47,7 +47,7 @@ instance FromRow Team where
     fromRow = Team <$> field <*> field 
 
 instance ToRow Team where
-    toRow u = [toField (teamId u), toField (name u)]
+    toRow u = [toField (name u)]
 
 
 data Task = Task { taskId :: Maybe Int,
@@ -61,8 +61,8 @@ instance FromRow Task where
     fromRow = Task <$> field <*> field <*> field <*> field <*> field 
 
 instance ToRow Task where
-     toRow t = [toField (taskId t), toField (beginDate t),
-        toField (endDate t), toField (exeqTeam t), toField (description t)]
+     toRow t = [toField (beginDate t), toField (endDate t),
+        toField (exeqTeam t), toField (description t)]
 
 instance ToJSON Task
 

@@ -25,7 +25,7 @@ routes conn = do
         json users
     put "/users" $ do
         user <- jsonData :: ActionM User
-        liftIO (insertUser conn user)
+        liftIO (insertInto conn insertUserQuery user $ userId user)
         json user
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
@@ -37,7 +37,7 @@ routes conn = do
         json teams
     put "/teams" $ do
         team <- jsonData :: ActionM Team
-        liftIO (insertTeam conn team)
+        liftIO (insertInto conn insertTeamQuery team $ teamId team)
         json team
     get "/teams/:id" $ do
         id <- param "id" :: ActionM TL.Text
@@ -50,6 +50,10 @@ routes conn = do
     get "/tasks/:id" $ do
         id <- param "id" :: ActionM TL.Text
         task <- liftIO (selectById conn id getTaskQueryId :: IO Task)
+        json task
+    put "/tasks" $ do
+        task <- jsonData :: ActionM Task
+        liftIO (insertInto conn insertTaskQuery task $ taskId task)
         json task
 
 
