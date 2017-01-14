@@ -59,6 +59,10 @@ routes conn = do
     get "/events" $ do
         events <- liftIO (selectAll conn getEventsQuery :: IO [Event])
         json events
+    get "/events/:id" $ do
+        id <- param "id" :: ActionM TL.Text
+        event <- liftIO (selectById conn id getEventQueryId :: IO Event)
+        json event
 
 
 main = do

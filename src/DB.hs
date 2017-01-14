@@ -22,6 +22,7 @@ getEventsQuery = "select id, name, creator from events" :: Query
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)" :: Query
 getTaskQueryId = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where id = (?)" :: Query
 getTeamQueryId = "select id, name from teams where id = (?)" :: Query
+getEventQueryId = "select id, name, creator from events where id = (?)" :: Query
 
 insertUserQuery = ("insert into users (first_name, second_name, team) values (?, ?, ?)" :: Query,
     "update users set first_name = (?), second_name = (?), team = (?) where id = (?)" :: Query)
