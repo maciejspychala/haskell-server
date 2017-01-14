@@ -36,6 +36,9 @@ CREATE TABLE "tasks" (
       "team" INTEGER NOT NULL
 );
 
+ALTER TABLE "tasks" ADD CONSTRAINT "fk_task__team" FOREIGN KEY ("team") REFERENCES "teams" ("id");
+
+
 insert into tasks (priority, importance, begin_date, end_date, description, team) values
 (1, 1, '2017-01-13', '2017-01-16', 'make login page', 1),
 (2, 1, '2017-01-15', '2017-01-26', 'refactor code', 2),
@@ -47,3 +50,20 @@ insert into tasks (priority, importance, begin_date, end_date, description, team
 (1, 3, '2017-02-06', '2017-02-12', 'new logo', 3),
 (2, 1, '2017-02-02', '2017-02-19', 'analyse analytics', 4),
 (1, 3, '2017-02-02', '2017-02-21', 'do not respond to emails', 5);
+
+CREATE TABLE "events" (
+    "id" BIGSERIAL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "creator" INTEGER NOT NULL
+);
+
+CREATE INDEX "idx_event__creator" ON "events" ("creator");
+
+ALTER TABLE "events" ADD CONSTRAINT "fk_event__creator" FOREIGN KEY ("creator") REFERENCES "users" ("id");
+
+insert into events (name, creator) values
+('George birthday', 5),
+('Srump details', 2),
+('New year', 3),
+('Why you should start programming in Haskell - presentation', 1),
+('Pizza party', 4);

@@ -17,6 +17,7 @@ import Data.Int
 getUsersQuery = "select id, first_name, second_name, team from users" :: Query
 getTeamsQuery = "select id, name from teams" :: Query
 getTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks" :: Query
+getEventsQuery = "select id, name, creator from events" :: Query
 
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)" :: Query
 getTaskQueryId = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where id = (?)" :: Query

@@ -73,3 +73,21 @@ instance FromJSON Task where
         v .: "endDate" <*>
         v .: "exeqTeam" <*>
         v .: "description"
+
+data Event = Event { eventId :: Maybe Int,
+    eventName :: String,
+    creator :: Int } deriving (Show, Generic)
+
+instance FromRow Event where
+    fromRow = Event <$> field <*> field <*> field
+
+instance ToRow Event where 
+    toRow e = [toField $ eventName e, toField $ creator e]
+
+instance ToJSON Event
+
+instance FromJSON Event where
+    parseJSON (Object v) = Event <$>
+        v .:? "eventId" <*>
+        v .: "eventName" <*>
+        v .: "creator"

@@ -56,6 +56,10 @@ routes conn = do
         liftIO (insertInto conn insertTaskQuery task $ taskId task)
         json task
 
+    get "/events" $ do
+        events <- liftIO (selectAll conn getEventsQuery :: IO [Event])
+        json events
+
 
 main = do
     x <- readFile "credentials.safe"
