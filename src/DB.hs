@@ -12,12 +12,15 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Web.Scotty
 import Data.Monoid ((<>))
+import Control.Monad.IO.Class
 import Data.Int
 
 getUsersQuery = "select id, first_name, second_name, team from users" :: Query
 getTeamsQuery = "select id, name from teams" :: Query
 getTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks" :: Query
 getEventsQuery = "select id, name, creator from events" :: Query
+getChecklistsQuery = "select id, task from checklists" :: Query
+getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 
 getUserQueryId = "select id, first_name, second_name, team from users where id = (?)" :: Query
 getTaskQueryId = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where id = (?)" :: Query
@@ -61,3 +64,14 @@ insertInto conn (update, insert) item id = do
         then execute conn update item
         else execute conn insert (toRow item ++ [toField $ id])
 
+getChecklists :: Connection -> IO [Checklist]
+getChecklists conn = do
+    xs <- query_ conn getChecklistsQuery :: IO [(Maybe Int, Int)]
+    --return $ map (\(checkId, task) -> Checklist checkId task $ liftIO (getChecklistsItems conn task)) xs
+    return $ map (\(checkId, task) -> Checklist checkId task []) xs
+
+
+getChecklistsItems :: Connection -> Int -> IO [ChecklistItem]
+getChecklistsItems conn checkId = do
+    items <- query conn getChecklistsItemQueryByTeamId (Only checkId)
+    return items

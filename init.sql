@@ -67,3 +67,40 @@ insert into events (name, creator) values
 ('New year', 3),
 ('Why you should start programming in Haskell - presentation', 1),
 ('Pizza party', 4);
+
+CREATE TABLE "checklists" (
+      "id" SERIAL PRIMARY KEY,
+      "task" INTEGER,
+      "user" INTEGER
+);
+
+CREATE INDEX "idx_checklist__user" ON "checklists" ("user");
+
+CREATE INDEX "idx_checklist__task" ON "checklists" ("task");
+
+ALTER TABLE "checklists" ADD CONSTRAINT "fk_checklist__user" FOREIGN KEY ("user") REFERENCES "users" ("id");
+
+ALTER TABLE "checklists" ADD CONSTRAINT "fk_checklist__task" FOREIGN KEY ("task") REFERENCES "tasks" ("id");
+
+CREATE TABLE "checklistitems" (
+      "id" SERIAL PRIMARY KEY,
+      "name" TEXT NOT NULL,
+      "finished" BOOLEAN NOT NULL,
+      "checklist" INTEGER NOT NULL
+);
+
+CREATE INDEX "idx_checklistitem__checklist" ON "checklistitems" ("checklist");
+
+ALTER TABLE "checklistitems" ADD CONSTRAINT "fk_checklistitem__checklist" FOREIGN KEY ("checklist") REFERENCES "checklists" ("id");
+
+insert into checklists (task) values
+(1),
+(2),
+(3),
+(4),
+(5);
+
+insert into checklistitems (name, finished, checklist) values
+('reformat code', true, 1),
+('delete debug message', true, 1),
+('devide Order into subclasses', false, 1);

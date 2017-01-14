@@ -68,6 +68,10 @@ routes conn = do
         liftIO (insertInto conn insertEventQuery event $ eventId event)
         json event
 
+    get "/checklists" $ do
+        checklists <- liftIO (getChecklists conn)
+        json checklists
+
 
 main = do
     x <- readFile "credentials.safe"

@@ -91,3 +91,38 @@ instance FromJSON Event where
         v .:? "eventId" <*>
         v .: "eventName" <*>
         v .: "creator"
+
+data Checklist = Checklist { checklistId :: Maybe Int,
+    listOwner :: Int,
+    checklistItems :: [ChecklistItem]} deriving (Show, Generic)
+
+instance ToRow Checklist where
+    toRow c = [toField $ listOwner c]
+
+instance ToJSON Checklist
+
+instance FromJSON Checklist where
+    parseJSON (Object v) = Checklist <$>
+        v .:? "checklistId" <*>
+        v .: "teamListOwner" <*>
+        v .: "checklistItems"
+
+data ChecklistItem = ChecklistItem { checklistItemId :: Maybe Int,
+    itemText :: String,
+    finished :: Bool,
+    checklist :: Int } deriving (Show, Generic)
+
+instance FromRow ChecklistItem where
+    fromRow = ChecklistItem <$> field <*> field <*> field <*> field
+
+instance ToRow ChecklistItem where
+    toRow i = [toField $ itemText i, toField $ finished i, toField $ checklist i]
+
+instance ToJSON ChecklistItem
+
+instance FromJSON ChecklistItem where
+    parseJSON (Object v) = ChecklistItem <$>
+        v .:? "checklistItemId" <*>
+        v .: "itemText" <*>
+        v .: "finished" <*>
+        v .: "checklist"
