@@ -7,11 +7,13 @@ import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToRow
 import Database.PostgreSQL.Simple.ToField
 import qualified Data.Text.Lazy as TL
+import qualified Data.ByteString
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Lazy.Char8 as LBS
 import Web.Scotty
 import Data.Monoid ((<>))
 import Data.Int
 
-getUsersQuery = "select id, first_name, second_name, team from users" :: Query
 getTeamsQuery = "select id, name from teams" :: Query
 getTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks" :: Query
 

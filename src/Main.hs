@@ -12,6 +12,7 @@ import Types
 import DB
 
 
+getUsersQuery = "select id, first_name, second_name, team from users"
 routes :: Connection -> ScottyM ()
 routes conn = do
     get "/hello" 
