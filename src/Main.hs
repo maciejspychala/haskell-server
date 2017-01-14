@@ -63,6 +63,10 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         event <- liftIO (selectById conn id getEventQueryId :: IO Event)
         json event
+    put "/events" $ do
+        event <- jsonData :: ActionM Event
+        liftIO (insertInto conn insertEventQuery event $ eventId event)
+        json event
 
 
 main = do

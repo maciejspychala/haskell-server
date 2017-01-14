@@ -32,6 +32,8 @@ insertTeamQuery = ("insert into teams (name) values (?)" :: Query,
 
 insertTaskQuery = ("insert into tasks (begin_date, end_date, team, description) values (?, ?, ?, ?)" :: Query,
     "update tasks set begin_date = (?), end_date = (?), team = (?), description = (?) where id = (?)" :: Query)
+insertEventQuery = ("insert into events (name, creator) values (?, ?)" :: Query,
+    "update events set name = (?), creator = (?) where id = (?)" :: Query)
 
 hello :: ActionM ()
 hello = do
