@@ -103,4 +103,6 @@ insert into checklists (task) values
 insert into checklistitems (name, finished, checklist) values
 ('reformat code', true, 1),
 ('delete debug message', true, 1),
-('devide Order into subclasses', false, 1);
+('devide Order into subclasses', false, 1),
+('reformat code', false, 2),
+('better methods naming', false, 2);

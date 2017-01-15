@@ -66,13 +66,14 @@ insertInto conn (update, insert) item id = do
 
 getChecklists :: Connection -> IO [Checklist]
 getChecklists conn = do
-    xs <- liftIO $ query_ conn getChecklistsQuery :: IO [(Maybe Int, Int)]
+    xs <- query_ conn getChecklistsQuery :: IO [(Maybe Int, Int)]
     mapM (\x -> makeChecklist conn x) xs
 
 makeChecklist :: Connection -> (Maybe Int, Int) -> IO Checklist
-makeChecklist conn (checkId, task) = do
-    items <- getChecklistsItems conn task
-    return $ Checklist checkId task items
+makeChecklist conn xd = do
+    (checkId, task) <- xd
+    ls <- getChecklistsItems conn task
+    return $ Checklist checkId task ls
 
 getChecklistsItems :: Connection -> Int -> IO [ChecklistItem]
 getChecklistsItems conn checkId = do
