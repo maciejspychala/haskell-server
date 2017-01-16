@@ -37,13 +37,13 @@ insertUserQuery = ("insert into users (first_name, second_name, team) values (?,
     "update users set first_name = (?), second_name = (?), team = (?) where id = (?)" :: Query)
 insertTeamQuery = ("insert into teams (name) values (?) returning id" :: Query,
     "update teams set name = (?) where id = (?)" :: Query)
-insertTaskQuery = ("insert into tasks (begin_date, end_date, team, description) values (?, ?, ?, ?)" :: Query,
+insertTaskQuery = ("insert into tasks (begin_date, end_date, team, description) values (?, ?, ?, ?) returning id" :: Query,
     "update tasks set begin_date = (?), end_date = (?), team = (?), description = (?) where id = (?)" :: Query)
-insertEventQuery = ("insert into events (name, creator) values (?, ?)" :: Query,
+insertEventQuery = ("insert into events (name, creator) values (?, ?) returning id" :: Query,
     "update events set name = (?), creator = (?) where id = (?)" :: Query)
-insertChecklistQuery = ("insert into checklists (task) values (?)" :: Query,
+insertChecklistQuery = ("insert into checklists (task) values (?) returning id" :: Query,
     "update checklists set task = (?) where id = (?)" :: Query)
-insertChecklistItemQuery = ("insert into checklistitems (name, finished, checklist) values (?, ?, ?)" :: Query,
+insertChecklistItemQuery = ("insert into checklistitems (name, finished, checklist) values (?, ?, ?) returning id" :: Query,
     "update checklistitems set name = (?), finished = (?), checklist = (?) where id = (?)" :: Query)
 
 
@@ -73,7 +73,9 @@ selectAllBy conn id q = do
 insertInto :: (ToRow r, HasId r) => Connection -> (Query, Query) -> r -> IO Int64
 insertInto conn (insert, update) item = do
     if null $ getId item
-        then execute conn insert item
+        then do
+            [Only i] <- (query conn insert item)
+            return i
         else execute conn update (toRow item ++ [toField $ getId item])
 
 getAllChecklists :: Connection -> IO [Checklist]
