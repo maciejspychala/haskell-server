@@ -71,11 +71,11 @@ selectAllBy conn id q = do
     return xs
 
 
-insertInto :: ToRow r => Connection -> (Query, Query) -> r -> Maybe Int -> IO Int64
-insertInto conn (insert, update) item id = do
-    if null $ id
+insertInto :: (ToRow r, HasId r) => Connection -> (Query, Query) -> r -> IO Int64
+insertInto conn (insert, update) item = do
+    if null $ getId item
         then execute conn insert item
-        else execute conn update (toRow item ++ [toField $ id])
+        else execute conn update (toRow item ++ [toField $ getId item])
 
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
@@ -91,3 +91,12 @@ getChecklistsItems :: Connection -> Int -> IO [ChecklistItem]
 getChecklistsItems conn checkId = do
     items <- query conn getChecklistsItemQueryByTeamId (Only checkId)
     return items
+
+insertChecklist :: Connection -> Checklist -> IO [Int64]
+insertChecklist conn checklist = do
+    let checkId = checklistId checklist
+        task = listOwner checklist
+        checkWithoutList = Checklist checkId task []
+        in do liftIO (insertInto conn insertChecklistQuery checkWithoutList)
+    mapM (\x -> liftIO $ insertInto conn insertChecklistItemQuery x)
+        $ checklistItems checklist

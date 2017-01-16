@@ -11,12 +11,16 @@ import Database.PostgreSQL.Simple.FromRow
 import Database.PostgreSQL.Simple.ToField
 import Data.Time.Clock
 
+class HasId a where
+    getId :: a -> Maybe Int
 
 data User = User { userId :: Maybe Int,
     firstName :: String,
     lastName :: String,
     team :: Int } deriving (Show, Generic) 
 
+instance HasId User where
+    getId a = userId a
 
 instance FromJSON User where
     parseJSON (Object v) = User <$>
@@ -35,6 +39,10 @@ instance ToRow User where
 
 data Team = Team { teamId :: Maybe Int,
     name :: String } deriving (Show, Generic) 
+
+
+instance HasId Team where
+    getId a = teamId a
 
 instance FromJSON Team where
     parseJSON (Object v) = Team <$>
@@ -56,6 +64,8 @@ data Task = Task { taskId :: Maybe Int,
     exeqTeam :: Int,
     description :: String } deriving (Show, Generic)
 
+instance HasId Task where
+    getId a = taskId a
 
 instance FromRow Task where
     fromRow = Task <$> field <*> field <*> field <*> field <*> field 
@@ -78,6 +88,10 @@ data Event = Event { eventId :: Maybe Int,
     eventName :: String,
     creator :: Int } deriving (Show, Generic)
 
+
+instance HasId Event where
+    getId a = eventId a
+
 instance FromRow Event where
     fromRow = Event <$> field <*> field <*> field
 
@@ -96,6 +110,9 @@ data Checklist = Checklist { checklistId :: Maybe Int,
     listOwner :: Int,
     checklistItems :: [ChecklistItem]} deriving (Show, Generic)
 
+instance HasId Checklist where
+    getId a = checklistId a
+
 instance ToRow Checklist where
     toRow c = [toField $ listOwner c]
 
@@ -111,6 +128,9 @@ data ChecklistItem = ChecklistItem { checklistItemId :: Maybe Int,
     itemText :: String,
     finished :: Bool,
     checklist :: Int } deriving (Show, Generic)
+
+instance HasId ChecklistItem where
+    getId a = checklistItemId a
 
 instance FromRow ChecklistItem where
     fromRow = ChecklistItem <$> field <*> field <*> field <*> field
