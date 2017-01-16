@@ -104,7 +104,7 @@ instance ToJSON Checklist
 instance FromJSON Checklist where
     parseJSON (Object v) = Checklist <$>
         v .:? "checklistId" <*>
-        v .: "teamListOwner" <*>
+        v .: "listOwner" <*>
         v .: "checklistItems"
 
 data ChecklistItem = ChecklistItem { checklistItemId :: Maybe Int,
