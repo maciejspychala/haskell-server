@@ -26,11 +26,12 @@ getUserQueryId = "select id, first_name, second_name, team from users where id =
 getTaskQueryId = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where id = (?)" :: Query
 getTeamQueryId = "select id, name from teams where id = (?)" :: Query
 getEventQueryId = "select id, name, creator from events where id = (?)" :: Query
+getTasksQueryByTeam = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where team = (?)" :: Query
 
-insertUserQuery = ("insert into users (first_name, second_name, team) values (?, ?, ?)" :: Query,
+insertUserQuery = ("insert into users (first_name, second_name, team) values (?, ?, ?) returning id" :: Query,
     "update users set first_name = (?), second_name = (?), team = (?) where id = (?)" :: Query)
 
-insertTeamQuery = ("insert into teams (name) values (?)" :: Query,
+insertTeamQuery = ("insert into teams (name) values (?) returning id" :: Query,
     "update teams set name = (?) where id = (?)" :: Query)
 
 insertTaskQuery = ("insert into tasks (begin_date, end_date, team, description) values (?, ?, ?, ?)" :: Query,
@@ -58,11 +59,16 @@ selectById conn id q = do
     tableWithOneRow <- query conn q (Only id)
     return (head tableWithOneRow)
 
+selectBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
+selectBy conn id q = do
+    tableWithOneRow <- query conn q (Only id)
+    return tableWithOneRow
+
 insertInto :: ToRow r => Connection -> (Query, Query) -> r -> Maybe Int -> IO Int64
-insertInto conn (update, insert) item id = do
+insertInto conn (insert, update) item id = do
     if null $ id
-        then execute conn update item
-        else execute conn insert (toRow item ++ [toField $ id])
+        then execute conn insert item
+        else execute conn update (toRow item ++ [toField $ id])
 
 getChecklists :: Connection -> IO [Checklist]
 getChecklists conn = do

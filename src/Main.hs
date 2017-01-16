@@ -12,6 +12,11 @@ import Types
 import DB
 
 
+ret x = do
+    addHeader "Access-Control-Allow-Origin" "*"
+    json x
+    
+
 routes :: Connection -> ScottyM ()
 routes conn = do
     get "/hello" 
@@ -22,55 +27,59 @@ routes conn = do
 
     get "/users" $ do
         users <- liftIO (selectAll conn getUsersQuery :: IO [User])
-        json users
+        ret users
     put "/users" $ do
         user <- jsonData :: ActionM User
         liftIO (insertInto conn insertUserQuery user $ userId user)
-        json user
+        ret user
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
         user <- liftIO (selectById conn id getUserQueryId :: IO User)
-        json user
+        ret user
 
     get "/teams" $ do
         teams <- liftIO (selectAll conn getTeamsQuery :: IO [Team])
-        json teams
+        ret teams
     put "/teams" $ do
         team <- jsonData :: ActionM Team
         liftIO (insertInto conn insertTeamQuery team $ teamId team)
-        json team
+        ret team
     get "/teams/:id" $ do
         id <- param "id" :: ActionM TL.Text
         team <- liftIO (selectById conn id getTeamQueryId :: IO Team)
-        json team
+        ret team
+    get "/teams/:id/tasks" $ do
+        id <- param "id" :: ActionM TL.Text
+        tasks <- liftIO (selectBy conn id getTasksQueryByTeam :: IO [Task])
+        ret tasks
 
     get "/tasks" $ do
         tasks <- liftIO (selectAll conn getTasksQuery :: IO [Task])
-        json tasks
+        ret tasks
     get "/tasks/:id" $ do
         id <- param "id" :: ActionM TL.Text
         task <- liftIO (selectById conn id getTaskQueryId :: IO Task)
-        json task
+        ret task
     put "/tasks" $ do
         task <- jsonData :: ActionM Task
         liftIO (insertInto conn insertTaskQuery task $ taskId task)
-        json task
+        ret task
 
     get "/events" $ do
         events <- liftIO (selectAll conn getEventsQuery :: IO [Event])
-        json events
+        ret events
     get "/events/:id" $ do
         id <- param "id" :: ActionM TL.Text
         event <- liftIO (selectById conn id getEventQueryId :: IO Event)
-        json event
+        ret event
     put "/events" $ do
         event <- jsonData :: ActionM Event
         liftIO (insertInto conn insertEventQuery event $ eventId event)
-        json event
+        ret event
 
     get "/checklists" $ do
         checklists <- liftIO (getChecklists conn)
-        json checklists
+        ret checklists
 
 
 main = do
@@ -78,4 +87,4 @@ main = do
     let [username,  password] = words x
     conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (BS.pack username) <> 
         "' dbname='maciek' password='" <> (BS.pack password) <> "'")
-    scotty 3000 (routes conn)
+    scotty 80 (routes conn)
