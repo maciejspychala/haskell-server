@@ -25,7 +25,7 @@ allEventsQuery = "select id, name, creator from events" :: Query
 allChecklistsQuery = "select id, task from checklists" :: Query
 
 -------------- select by Id
-whereQuery = "where id = (?)" :: Query
+whereQuery = " where id = (?)" :: Query
 getUserQueryById = allUsersQuery <> whereQuery
 getTaskQueryById = allTasksQuery <> whereQuery 
 getTeamQueryById = allTeamsQuery <> whereQuery
