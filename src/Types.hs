@@ -13,6 +13,7 @@ import Data.Time.Clock
 
 class HasId a where
     getId :: a -> Maybe Int
+    setId :: a -> Maybe Int -> a
 
 data User = User { userId :: Maybe Int,
     firstName :: String,
@@ -21,6 +22,7 @@ data User = User { userId :: Maybe Int,
 
 instance HasId User where
     getId a = userId a
+    setId a id = a { userId = id }
 
 instance FromJSON User where
     parseJSON (Object v) = User <$>
@@ -43,6 +45,7 @@ data Team = Team { teamId :: Maybe Int,
 
 instance HasId Team where
     getId a = teamId a
+    setId a id = a { teamId = id }
 
 instance FromJSON Team where
     parseJSON (Object v) = Team <$>
@@ -66,6 +69,7 @@ data Task = Task { taskId :: Maybe Int,
 
 instance HasId Task where
     getId a = taskId a
+    setId a id = a { taskId = id }
 
 instance FromRow Task where
     fromRow = Task <$> field <*> field <*> field <*> field <*> field 
@@ -91,6 +95,7 @@ data Event = Event { eventId :: Maybe Int,
 
 instance HasId Event where
     getId a = eventId a
+    setId a id = a { eventId = id }
 
 instance FromRow Event where
     fromRow = Event <$> field <*> field <*> field
@@ -112,6 +117,7 @@ data Checklist = Checklist { checklistId :: Maybe Int,
 
 instance HasId Checklist where
     getId a = checklistId a
+    setId a id = a { checklistId = id }
 
 instance ToRow Checklist where
     toRow c = [toField $ listOwner c]
@@ -131,6 +137,7 @@ data ChecklistItem = ChecklistItem { checklistItemId :: Maybe Int,
 
 instance HasId ChecklistItem where
     getId a = checklistItemId a
+    setId a id = a { checklistItemId = id }
 
 instance FromRow ChecklistItem where
     fromRow = ChecklistItem <$> field <*> field <*> field <*> field

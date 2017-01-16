@@ -23,8 +23,8 @@ routes conn = do
         ret users
     put "/users" $ do
         user <- jsonData :: ActionM User
-        liftIO (insertInto conn insertUserQuery user)
-        ret user
+        new <- liftIO (insertInto conn insertUserQuery user)
+        ret new
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
         user <- liftIO (selectById conn id getUserQueryById :: IO User)
@@ -35,8 +35,8 @@ routes conn = do
         ret teams
     put "/teams" $ do
         team <- jsonData :: ActionM Team
-        liftIO (insertInto conn insertTeamQuery team)
-        ret team
+        new <- liftIO (insertInto conn insertTeamQuery team)
+        ret new
     get "/teams/:id" $ do
         id <- param "id" :: ActionM TL.Text
         team <- liftIO (selectById conn id getTeamQueryById :: IO Team)
@@ -59,8 +59,8 @@ routes conn = do
         ret task
     put "/tasks" $ do
         task <- jsonData :: ActionM Task
-        liftIO (insertInto conn insertTaskQuery task)
-        ret task
+        new <- liftIO (insertInto conn insertTaskQuery task)
+        ret new
 
     get "/events" $ do
         events <- liftIO (selectAll conn allEventsQuery :: IO [Event])
@@ -71,8 +71,8 @@ routes conn = do
         ret event
     put "/events" $ do
         event <- jsonData :: ActionM Event
-        liftIO (insertInto conn insertEventQuery event)
-        ret event
+        new <- liftIO (insertInto conn insertEventQuery event)
+        ret new
 
     get "/checklists" $ do
         checklists <- liftIO (getAllChecklists conn)
