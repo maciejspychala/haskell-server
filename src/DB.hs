@@ -25,11 +25,11 @@ allEventsQuery = "select id, name, creator from events" :: Query
 allChecklistsQuery = "select id, task from checklists" :: Query
 
 -------------- select by Id
-whereQuery = " where id = (?)" :: Query
-getUserQueryById = allUsersQuery <> whereQuery
-getTaskQueryById = allTasksQuery <> whereQuery 
-getTeamQueryById = allTeamsQuery <> whereQuery
-getEventQueryById = allEventsQuery <> whereQuery
+whereId = " where id = (?)" :: Query
+getUserQueryById = allUsersQuery <> whereId
+getTaskQueryById = allTasksQuery <> whereId 
+getTeamQueryById = allTeamsQuery <> whereId
+getEventQueryById = allEventsQuery <> whereId
 
 
 -------------- insert queries
@@ -50,8 +50,7 @@ insertChecklistItemQuery = ("insert into checklistitems (name, finished, checkli
 
 getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 
-getTasksQueryByTeam = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where team = (?)" :: Query
-getUsersQueryByTeam = allUsersQuery <> " where team = (?)"
+whereTeam = " where team = (?)" :: Query
 
 selectAll :: FromRow q => Connection -> Query -> IO [q]
 selectAll conn q = do
