@@ -51,7 +51,7 @@ insertChecklistItemQuery = ("insert into checklistitems (name, finished, checkli
 getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 
 getTasksQueryByTeam = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks where team = (?)" :: Query
-
+getUsersQueryByTeam = allUsersQuery <> " where team = (?)"
 
 selectAll :: FromRow q => Connection -> Query -> IO [q]
 selectAll conn q = do
