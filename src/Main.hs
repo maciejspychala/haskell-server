@@ -85,7 +85,8 @@ routes conn = do
 
 main = do
     x <- readFile "credentials.safe"
-    let [username,  password] = words x
+    let [username,  password, portString] = words x
+        port = read portString :: Int
     conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (BS.pack username) <> 
         "' dbname='maciek' password='" <> (BS.pack password) <> "'")
-    scotty 3000 (routes conn)
+    scotty port (routes conn)
