@@ -26,4 +26,5 @@ executable haskellserver
                        transformers,
                        postgresql-simple,
                        postgresql-libpq,
-                       time
+                       time,
+                       wai-cors
