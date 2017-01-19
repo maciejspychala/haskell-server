@@ -82,20 +82,15 @@ insertInto conn (insert, update) item = do
             xs <- execute conn update (toRow item ++ [toField $ getId item])
             return $ item
 
+getWithArray :: (FromRow q, HasArray q) => Connection -> Query -> IO [q]
+getWithArray conn query = do
+    parents <- selectAll conn query
+    mapM (\x -> setArray conn x) parents
+
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
     xs <- liftIO $ query_ conn allChecklistsQuery :: IO [Checklist]
     mapM (\x -> setArray conn x) xs
-
-makeChecklist :: Connection -> (Maybe Int, Int) -> IO Checklist
-makeChecklist conn (checkId, task) = do
-    items <- getChecklistsItems conn task
-    return $ Checklist checkId task items
-
-getChecklistsItems :: Connection -> Int -> IO [ChecklistItem]
-getChecklistsItems conn checkId = do
-    items <- query conn getChecklistsItemQueryByTeamId (Only checkId)
-    return items
 
 insertChecklist :: Connection -> Checklist -> IO ()
 insertChecklist conn checklist = do

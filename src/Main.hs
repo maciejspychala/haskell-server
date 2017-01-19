@@ -76,7 +76,7 @@ routes conn = do
         ret new
 
     get "/checklists" $ do
-        checklists <- liftIO (getAllChecklists conn)
+        checklists <- liftIO (getWithArray conn allChecklistsQuery :: IO [Checklist])
         ret checklists
     put "/checklists" $ do
         checklist <- jsonData :: ActionM Checklist
