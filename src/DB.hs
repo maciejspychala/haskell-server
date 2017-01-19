@@ -19,7 +19,7 @@ import Data.Int
 
 
 -------------- select all
-allUsersQuery = "select id, first_name, second_name, team from users" :: Query
+allUsersQuery = "select id, first_name, second_name from users" :: Query
 allTeamsQuery = "select id, name from teams" :: Query
 allTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks" :: Query
 allEventsQuery = "select id, name, creator from events" :: Query
@@ -46,7 +46,7 @@ insertChecklistQuery = ("insert into checklists (task) values (?) returning id" 
     "update checklists set task = (?) where id = (?)" :: Query)
 insertChecklistItemQuery = ("insert into checklistitems (name, finished, checklist) values (?, ?, ?) returning id" :: Query,
     "update checklistitems set name = (?), finished = (?), checklist = (?) where id = (?)" :: Query)
-
+insertTeamUserQuery = "insert into user_team (teamId, userId) values (?, ?)" :: Query
 
 
 getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
@@ -66,13 +66,11 @@ selectById conn id q = do
     return (head tableWithOneRow)
 
 selectAllBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
-selectAllBy conn id q = do
-    xs <- query conn q (Only id)
-    return xs
+selectAllBy conn id q = query conn q (Only id)
 
 
 insertInto :: (ToRow r, HasId r) => Connection -> (Query, Query) -> r -> IO r
-insertInto conn (insert, update) item = do
+insertInto conn (insert, update) item = 
     if null $ getId item
         then do
             [Only i] <- (query conn insert item)

@@ -20,7 +20,7 @@ ret x = do
 routes :: Connection -> ScottyM ()
 routes conn = do
     get "/users" $ do
-        users <- liftIO (selectAll conn allUsersQuery :: IO [User])
+        users <- liftIO (getWithArray conn allUsersQuery :: IO [User])
         ret users
     put "/users" $ do
         user <- jsonData :: ActionM User
