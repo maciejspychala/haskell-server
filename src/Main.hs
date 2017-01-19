@@ -10,9 +10,9 @@ import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import Types
 import DB
+import Network.Wai.Middleware.Cors
 
 ret x = do
-    addHeader "Access-Control-Allow-Origin" "*"
     json x
     
 
@@ -83,10 +83,14 @@ routes conn = do
         ret checklist
 
 
+
 main = do
     x <- readFile "credentials.safe"
     let [username,  password, portString] = words x
         port = read portString :: Int
+    let resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT"] } 
     conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (BS.pack username) <> 
         "' dbname='maciek' password='" <> (BS.pack password) <> "'")
-    scotty port (routes conn)
+    scotty port $ do
+        middleware $ cors (const $ Just resourcePolicy)
+        routes conn
