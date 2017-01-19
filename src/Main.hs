@@ -8,6 +8,7 @@ import Database.PostgreSQL.Simple
 import qualified Data.ByteString
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as LBS
+import Typeclasses
 import Types
 import DB
 import Network.Wai.Middleware.Cors

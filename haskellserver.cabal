@@ -14,7 +14,17 @@ cabal-version:       >=1.10
 executable haskellserver
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       DB, Types
+  other-modules:       DB,
+                       Typeclasses,
+                       Types,
+                       Types.Checklist,
+                       Types.Event,
+                       Types.Imports,
+                       Types.Task,
+                       Types.Team,
+                       Types.User,
+                       Types.Usergroup
+
   default-language:    Haskell2010
   other-extensions:    OverloadedStrings
   build-depends:       base >=4.8, 

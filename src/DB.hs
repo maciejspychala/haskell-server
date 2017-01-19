@@ -2,6 +2,7 @@
 
 module DB where
 
+import Typeclasses
 import Types
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToRow
@@ -83,8 +84,8 @@ insertInto conn (insert, update) item = do
 
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
-    xs <- liftIO $ query_ conn allChecklistsQuery :: IO [(Maybe Int, Int)]
-    mapM (\x -> makeChecklist conn x) xs
+    xs <- liftIO $ query_ conn allChecklistsQuery :: IO [Checklist]
+    mapM (\x -> setArray conn x) xs
 
 makeChecklist :: Connection -> (Maybe Int, Int) -> IO Checklist
 makeChecklist conn (checkId, task) = do
