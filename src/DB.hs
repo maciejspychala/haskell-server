@@ -52,14 +52,10 @@ getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from chec
 whereTeam = " where team = (?)" :: Query
 
 selectAll :: FromRow q => Connection -> Query -> IO [q]
-selectAll conn q = do
-    allRows <- query_ conn q
-    return allRows
+selectAll = query_
 
 selectById :: FromRow q => Connection -> TL.Text -> Query -> IO q
-selectById conn id q = do
-    tableWithOneRow <- query conn q (Only id)
-    return (head tableWithOneRow)
+selectById conn id q = head <$> selectAllBy conn id q
 
 selectAllBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
 selectAllBy conn id q = query conn q (Only id)
@@ -96,6 +92,6 @@ insertChecklist conn checklist = do
         task = listOwner checklist
         checkWithoutList = Checklist checkId task []
         in liftIO (insertInto conn insertChecklistQuery checkWithoutList)
-    mapM_ (\x -> liftIO $ insertInto conn insertChecklistItemQuery x)
-        $ checklistItems checklist
+    mapM_ (insertInto conn insertChecklistItemQuery)
+        $ (checklistItems checklist :: [ChecklistItem])
     return ()
