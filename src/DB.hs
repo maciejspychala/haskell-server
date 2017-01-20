@@ -16,8 +16,6 @@ import Data.Monoid ((<>))
 import Control.Monad.IO.Class
 import Data.Int
 
-
-
 -------------- select all
 allUsersQuery = "select id, first_name, second_name from users" :: Query
 allTeamsQuery = "select id, name from teams" :: Query
@@ -57,8 +55,6 @@ selectAll :: FromRow q => Connection -> Query -> IO [q]
 selectAll conn q = do
     allRows <- query_ conn q
     return allRows
-    
-
 
 selectById :: FromRow q => Connection -> TL.Text -> Query -> IO q
 selectById conn id q = do
@@ -68,34 +64,38 @@ selectById conn id q = do
 selectAllBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
 selectAllBy conn id q = query conn q (Only id)
 
-
 insertInto :: (ToRow r, HasId r) => Connection -> (Query, Query) -> r -> IO r
 insertInto conn (insert, update) item = 
     if null $ getId item
         then do
-            [Only i] <- (query conn insert item)
+            [Only i] <- query conn insert item
             let newId = fromIntegral (i :: Int64)
                 in return $ setId item $ Just newId
         else do
             xs <- execute conn update (toRow item ++ [toField $ getId item])
-            return $ item
+            return item
+
+insertIdId :: (ToField a) => Connection -> Query -> (a, a) -> IO (a, a)
+insertIdId conn insert (id1, id2) = do
+            execute conn insert (id1, id2)
+            return (id1, id2)
 
 getWithArray :: (FromRow q, HasArray q) => Connection -> Query -> IO [q]
 getWithArray conn query = do
     parents <- selectAll conn query
-    mapM (\x -> setArray conn x) parents
+    mapM (setArray conn) parents
 
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
     xs <- liftIO $ query_ conn allChecklistsQuery :: IO [Checklist]
-    mapM (\x -> setArray conn x) xs
+    mapM (setArray conn) xs
 
 insertChecklist :: Connection -> Checklist -> IO ()
 insertChecklist conn checklist = do
     let checkId = checklistId checklist
         task = listOwner checklist
         checkWithoutList = Checklist checkId task []
-        in do liftIO (insertInto conn insertChecklistQuery checkWithoutList)
-    mapM (\x -> liftIO $ insertInto conn insertChecklistItemQuery x)
+        in liftIO (insertInto conn insertChecklistQuery checkWithoutList)
+    mapM_ (\x -> liftIO $ insertInto conn insertChecklistItemQuery x)
         $ checklistItems checklist
     return ()
