@@ -30,6 +30,9 @@ getTaskQueryById = allTasksQuery <> whereId
 getTeamQueryById = allTeamsQuery <> whereId
 getEventQueryById = allEventsQuery <> whereId
 
+teamUsersQuery = "select id, first_name, second_name from users where id in ("
+    <> "select userId from user_team where teamId = (?)"
+    <> ")" :: Query
 
 -------------- insert queries
 insertUserQuery = ("insert into users (first_name, second_name, team) values (?, ?, ?) returning id" :: Query,
@@ -85,6 +88,11 @@ getWithArrayById :: (FromRow q, HasArray q) => Connection -> TL.Text -> Query ->
 getWithArrayById conn id query = do
     parent <- selectById conn id query
     setArray conn parent
+
+getAllWithArrayById :: (Show q, FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO [q]
+getAllWithArrayById conn id query = do
+    parents <- selectAllBy conn id query
+    mapM (setArray conn) parents
 
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
