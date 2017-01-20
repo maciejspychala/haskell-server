@@ -81,6 +81,11 @@ getWithArray conn query = do
     parents <- selectAll conn query
     mapM (setArray conn) parents
 
+getWithArrayById :: (FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO q
+getWithArrayById conn id query = do
+    parent <- selectById conn id query
+    setArray conn parent
+
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
     xs <- liftIO $ query_ conn allChecklistsQuery :: IO [Checklist]
@@ -92,6 +97,5 @@ insertChecklist conn checklist = do
         task = listOwner checklist
         checkWithoutList = Checklist checkId task []
         in liftIO (insertInto conn insertChecklistQuery checkWithoutList)
-    mapM_ (insertInto conn insertChecklistItemQuery)
-        $ (checklistItems checklist :: [ChecklistItem])
+    mapM_ (insertInto conn insertChecklistItemQuery) $ checklistItems checklist
     return ()

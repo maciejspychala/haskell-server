@@ -28,7 +28,7 @@ routes conn = do
         ret new
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        user <- liftIO (selectById conn id getUserQueryById :: IO User)
+        user <- liftIO (getWithArrayById conn id getUserQueryById :: IO User)
         ret user
 
     get "/teams" $ do
