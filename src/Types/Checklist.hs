@@ -23,9 +23,8 @@ instance HasArray Checklist where
 
 
 getChecklistsItems2 :: Connection -> Int -> IO [ChecklistItem]
-getChecklistsItems2 conn checkId = do
-    items <- query conn getChecklistsItemQueryByTeamId2 (Only checkId)
-    return items
+getChecklistsItems2 conn checkId = 
+    query conn getChecklistsItemQueryByTeamId2 (Only checkId)
 
 getChecklistsItemQueryByTeamId2 = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 

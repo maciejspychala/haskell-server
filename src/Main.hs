@@ -20,7 +20,7 @@ ret x = do
 routes :: Connection -> ScottyM ()
 routes conn = do
     get "/users" $ do
-        users <- liftIO (selectAll conn allUsersQuery :: IO [User])
+        users <- liftIO (getWithArray conn allUsersQuery :: IO [User])
         ret users
     put "/users" $ do
         user <- jsonData :: ActionM User
@@ -28,7 +28,7 @@ routes conn = do
         ret new
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        user <- liftIO (selectById conn id getUserQueryById :: IO User)
+        user <- liftIO (getWithArrayById conn id getUserQueryById :: IO User)
         ret user
 
     get "/teams" $ do
@@ -48,8 +48,13 @@ routes conn = do
         ret tasks
     get "/teams/:id/users" $ do
         id <- param "id" :: ActionM TL.Text
-        tasks <- liftIO (selectAllBy conn id (allUsersQuery <> whereTeam) :: IO [User])
-        ret tasks
+        users <- liftIO (getAllWithArrayById conn id teamUsersQuery :: IO [User])
+        ret users
+    get "/teams/:tid/users/add/:uid" $ do
+        tid <- param "tid"  :: ActionM TL.Text
+        uid <- param "uid"  :: ActionM TL.Text
+        liftIO (insertIdId conn insertTeamUserQuery (tid, uid))
+        ret tid
 
     get "/tasks" $ do
         tasks <- liftIO (selectAll conn allTasksQuery :: IO [Task])
