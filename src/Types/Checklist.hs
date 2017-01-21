@@ -24,9 +24,9 @@ instance HasArray Checklist where
 
 getChecklistsItems2 :: Connection -> Int -> IO [ChecklistItem]
 getChecklistsItems2 conn checkId = 
-    query conn getChecklistsItemQueryByTeamId2 (Only checkId)
+    query conn getChecklistItemsQueryByTeamId (Only checkId)
 
-getChecklistsItemQueryByTeamId2 = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
+getChecklistItemsQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 
 instance ToRow Checklist where
     toRow c = [toField $ listOwner c]
