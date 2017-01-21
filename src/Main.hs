@@ -50,7 +50,7 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         users <- liftIO (getAllWithArrayById conn id teamUsersQuery :: IO [User])
         ret users
-    get "/teams/:tid/users/add/:uid" $ do
+    put "/teams/:tid/users/add/:uid" $ do
         tid <- param "tid"  :: ActionM TL.Text
         uid <- param "uid"  :: ActionM TL.Text
         liftIO (insertIdId conn insertTeamUserQuery (tid, uid))
