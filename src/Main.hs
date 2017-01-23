@@ -98,7 +98,7 @@ main = do
     x <- readFile "credentials.safe"
     let [username,  password, portString] = words x
         port = read portString :: Int
-    let resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT"], ["content-type", "origin"] } 
+    let resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT"], corsRequestHeaders = ["content-type", "origin"] } 
     conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (BS.pack username) <> 
         "' dbname='maciek' password='" <> (BS.pack password) <> "'")
     scotty port $ do
