@@ -2,8 +2,8 @@
 
 module DB where
 
-import Typeclasses
 import Types
+import Typeclasses
 import Database.PostgreSQL.Simple
 import Database.PostgreSQL.Simple.ToRow
 import Database.PostgreSQL.Simple.ToField
@@ -48,9 +48,9 @@ insertChecklistQuery = ("insert into checklists (task) values (?) returning id" 
 insertChecklistItemQuery = ("insert into checklistitems (name, finished, checklist) values (?, ?, ?) returning id" :: Query,
     "update checklistitems set name = (?), finished = (?), checklist = (?) where id = (?)" :: Query)
 insertTeamUserQuery = "insert into user_team (teamId, userId) values (?, ?)" :: Query
+ 
+getChecklistByOwner = "select id, task from checklists where task = (?)" :: Query
 
-
-getChecklistsItemQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
 
 whereTeam = " where team = (?)" :: Query
 
@@ -83,6 +83,7 @@ getWithArray :: (FromRow q, HasArray q) => Connection -> Query -> IO [q]
 getWithArray conn query = do
     parents <- selectAll conn query
     mapM (setArray conn) parents
+
 
 getWithArrayById :: (FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO q
 getWithArrayById conn id query = do

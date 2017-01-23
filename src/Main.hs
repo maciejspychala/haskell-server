@@ -67,6 +67,10 @@ routes conn = do
         task <- jsonData :: ActionM Task
         new <- liftIO (insertInto conn insertTaskQuery task)
         ret new
+    get "/tasks/:id/checklist" $ do
+        id <- param "id" :: ActionM TL.Text
+        checklist <- liftIO (getWithArrayById conn id getChecklistByOwner :: IO Checklist)
+        ret checklist
 
     get "/events" $ do
         events <- liftIO (selectAll conn allEventsQuery :: IO [Event])

@@ -18,12 +18,12 @@ instance HasId Checklist where
 
 instance HasArray Checklist where
     setArray conn a = do 
-        xs <- getChecklistsItems2 conn $ listOwner a
+        xs <- getChecklistsItems conn $ listOwner a
         return a { checklistItems = xs }
 
 
-getChecklistsItems2 :: Connection -> Int -> IO [ChecklistItem]
-getChecklistsItems2 conn checkId = 
+getChecklistsItems :: Connection -> Int -> IO [ChecklistItem]
+getChecklistsItems conn checkId = 
     query conn getChecklistItemsQueryByTeamId (Only checkId)
 
 getChecklistItemsQueryByTeamId = "select id, name, finished, checklist from checklistitems where checklist = (?)" :: Query
