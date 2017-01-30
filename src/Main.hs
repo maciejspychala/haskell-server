@@ -28,7 +28,7 @@ routes conn = do
         ret new
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        user <- liftIO (getWithArrayById conn id getUserQueryById :: IO User)
+        user <- liftIO (getWithArrayById conn id getUserQueryById :: IO (Maybe User))
         ret user
 
     get "/teams" $ do
@@ -40,7 +40,7 @@ routes conn = do
         ret new
     get "/teams/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        team <- liftIO (selectById conn id getTeamQueryById :: IO Team)
+        team <- liftIO (selectById conn id getTeamQueryById :: IO (Maybe Team))
         ret team
     delete "/teams/:id" $ do
         id <- param "id" :: ActionM TL.Text
@@ -70,7 +70,7 @@ routes conn = do
         ret tasks
     get "/tasks/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        task <- liftIO (selectById conn id getTaskQueryById :: IO Task)
+        task <- liftIO (selectById conn id getTaskQueryById :: IO (Maybe Task))
         ret task
     put "/tasks" $ do
         task <- jsonData :: ActionM Task
@@ -78,7 +78,7 @@ routes conn = do
         ret new
     get "/tasks/:id/checklist" $ do
         id <- param "id" :: ActionM TL.Text
-        checklist <- liftIO (getWithArrayById conn id getChecklistByOwner :: IO Checklist)
+        checklist <- liftIO (getWithArrayById conn id getChecklistByOwner :: IO (Maybe Checklist))
         ret checklist
 
     get "/events" $ do
@@ -86,7 +86,7 @@ routes conn = do
         ret events
     get "/events/:id" $ do
         id <- param "id" :: ActionM TL.Text
-        event <- liftIO (selectById conn id getEventQueryById :: IO Event)
+        event <- liftIO (selectById conn id getEventQueryById :: IO (Maybe Event))
         ret event
     put "/events" $ do
         event <- jsonData :: ActionM Event

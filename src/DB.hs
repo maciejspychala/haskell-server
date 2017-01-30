@@ -54,12 +54,15 @@ deleteTeamQuery = "delete from teams where id = (?)" :: Query
 getChecklistByOwner = "select id, task from checklists where task = (?)" :: Query
 whereTeam = " where team = (?)" :: Query
 
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead xs = Just $ head xs
 
 selectAll :: FromRow q => Connection -> Query -> IO [q]
 selectAll = query_
 
-selectById :: FromRow q => Connection -> TL.Text -> Query -> IO q
-selectById conn id q = head <$> selectAllBy conn id q
+selectById :: FromRow q => Connection -> TL.Text -> Query -> IO (Maybe q)
+selectById conn id q = safeHead <$> selectAllBy conn id q
 
 deleteById :: Connection -> Query -> TL.Text -> IO Int64
 deleteById conn q id = do
@@ -94,10 +97,14 @@ getWithArray conn query = do
     mapM (setArray conn) parents
 
 
-getWithArrayById :: (FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO q
+getWithArrayById :: (FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO (Maybe q)
 getWithArrayById conn id query = do
     parent <- selectById conn id query
-    setArray conn parent
+    case parent of
+        Just value -> do
+            x <- setArray conn value
+            return $ Just x
+        Nothing -> return Nothing
 
 getAllWithArrayById :: (Show q, FromRow q, HasArray q) => Connection -> TL.Text -> Query -> IO [q]
 getAllWithArrayById conn id query = do
@@ -106,7 +113,7 @@ getAllWithArrayById conn id query = do
 
 getAllChecklists :: Connection -> IO [Checklist]
 getAllChecklists conn = do
-    xs <- liftIO $ query_ conn allChecklistsQuery :: IO [Checklist]
+    xs <- liftIO $ selectAll conn allChecklistsQuery :: IO [Checklist]
     mapM (setArray conn) xs
 
 insertChecklist :: Connection -> Checklist -> IO ()
