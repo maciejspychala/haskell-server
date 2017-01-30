@@ -42,6 +42,10 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         team <- liftIO (selectById conn id getTeamQueryById :: IO Team)
         ret team
+    delete "/teams/:id" $ do
+        id <- param "id" :: ActionM TL.Text
+        liftIO (deleteById conn deleteTeamQuery id)
+        ret id
     get "/teams/:id/tasks" $ do
         id <- param "id" :: ActionM TL.Text
         tasks <- liftIO (selectAllBy conn id (allTasksQuery <> whereTeam) :: IO [Task])

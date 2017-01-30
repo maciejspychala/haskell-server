@@ -49,17 +49,21 @@ insertChecklistItemQuery = ("insert into checklistitems (name, finished, checkli
     "update checklistitems set name = (?), finished = (?), checklist = (?) where id = (?)" :: Query)
 insertTeamUserQuery = "insert into user_team (teamId, userId) values (?, ?)" :: Query
 deleteTeamUserQuery = "delete from user_team where teamId = (?) and userId = (?)" :: Query
+deleteTeamQuery = "delete from teams where id = (?)" :: Query
  
 getChecklistByOwner = "select id, task from checklists where task = (?)" :: Query
-
-
 whereTeam = " where team = (?)" :: Query
+
 
 selectAll :: FromRow q => Connection -> Query -> IO [q]
 selectAll = query_
 
 selectById :: FromRow q => Connection -> TL.Text -> Query -> IO q
 selectById conn id q = head <$> selectAllBy conn id q
+
+deleteById :: Connection -> Query -> TL.Text -> IO Int64
+deleteById conn q id = do
+    execute conn q (Only id)
 
 selectAllBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
 selectAllBy conn id q = query conn q (Only id)
