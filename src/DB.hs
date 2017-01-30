@@ -48,6 +48,7 @@ insertChecklistQuery = ("insert into checklists (task) values (?) returning id" 
 insertChecklistItemQuery = ("insert into checklistitems (name, finished, checklist) values (?, ?, ?) returning id" :: Query,
     "update checklistitems set name = (?), finished = (?), checklist = (?) where id = (?)" :: Query)
 insertTeamUserQuery = "insert into user_team (teamId, userId) values (?, ?)" :: Query
+deleteTeamUserQuery = "delete from user_team where teamId = (?) and userId = (?)" :: Query
  
 getChecklistByOwner = "select id, task from checklists where task = (?)" :: Query
 
@@ -76,8 +77,12 @@ insertInto conn (insert, update) item =
 
 insertIdId :: (ToField a) => Connection -> Query -> (a, a) -> IO (a, a)
 insertIdId conn insert (id1, id2) = do
-            execute conn insert (id1, id2)
-            return (id1, id2)
+    execute conn insert (id1, id2)
+    return (id1, id2)
+
+deleteIdId :: (ToField a) => Connection -> Query -> (a, a) -> IO Int64
+deleteIdId conn query (id1, id2) = do
+    execute conn query (id1, id2)
 
 getWithArray :: (FromRow q, HasArray q) => Connection -> Query -> IO [q]
 getWithArray conn query = do
