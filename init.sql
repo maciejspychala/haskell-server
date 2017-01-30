@@ -104,3 +104,24 @@ insert into checklistitems (name, finished, checklist) values
 ('devide Order into subclasses', false, 1),
 ('reformat code', false, 2),
 ('better methods naming', false, 2);
+
+
+CREATE TABLE "user_team" (
+      "userid" INTEGER NOT NULL,
+      "teamid" INTEGER NOT NULL,
+      PRIMARY KEY ("userid", "teamid")
+);
+
+CREATE INDEX "idx_user_team" ON "user_team" ("teamid");
+
+ALTER TABLE "user_team" ADD CONSTRAINT "fk_user_team__user" FOREIGN KEY ("userid") REFERENCES "users" ("id") on delete cascade;
+
+ALTER TABLE "user_team" ADD CONSTRAINT "fk_user_team__team" FOREIGN KEY ("teamid") REFERENCES "teams" ("id") on delete cascade;
+
+insert into user_team (userid, teamid) values
+(1, 2),
+(2, 3),
+(3, 4),
+(4, 5),
+(5, 2),
+(6, 1);
