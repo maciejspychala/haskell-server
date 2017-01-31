@@ -145,3 +145,11 @@ BEGIN
 END;
 $$
 LANGUAGE 'plpgsql' IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION set_salary(in userid integer) returns void AS $$
+DECLARE
+BEGIN
+    update users set salary = (select trunc(random() * 5000 + 2000)) where id = userid;
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
