@@ -52,6 +52,7 @@ deleteTeamUserQuery = "delete from user_team where teamId = (?) and userId = (?)
 deleteTeamQuery = "delete from teams where id = (?)" :: Query
  
 getChecklistByOwner = "select id, task from checklists where task = (?)" :: Query
+getUserSalaryById = "select year_salary(?)" :: Query
 whereTeam = " where team = (?)" :: Query
 
 safeHead :: [a] -> Maybe a

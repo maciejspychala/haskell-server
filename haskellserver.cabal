@@ -22,6 +22,7 @@ executable haskellserver
                        Types.Imports,
                        Types.Task,
                        Types.Team,
+                       Types.Salary,
                        Types.User,
                        Types.Usergroup
 

@@ -30,6 +30,14 @@ routes conn = do
         id <- param "id" :: ActionM TL.Text
         user <- liftIO (getWithArrayById conn id getUserQueryById :: IO (Maybe User))
         ret user
+    get "/users/:id/salary" $ do
+        id <- param "id" :: ActionM TL.Text
+        x <- liftIO (selectById conn id getUserSalaryById :: IO (Maybe (Only Double)))
+        case x of
+            Nothing -> do
+                ret (Nothing :: Maybe Salary)
+            Just value -> do
+                ret $ Salary (read $ TL.unpack id :: Int) $ fromOnly value
 
     get "/teams" $ do
         teams <- liftIO (selectAll conn allTeamsQuery :: IO [Team])

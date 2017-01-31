@@ -4,6 +4,7 @@ module Types (
     module Types.User,
     module Types.Checklist,
     module Types.Event,
+    module Types.Salary,
     module Types.Usergroup
 ) where
 
@@ -12,4 +13,5 @@ import Types.Task
 import Types.User
 import Types.Checklist
 import Types.Event
+import Types.Salary
 import Types.Usergroup
