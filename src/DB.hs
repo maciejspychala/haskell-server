@@ -35,7 +35,7 @@ teamUsersQuery = "select id, first_name, second_name from users where id in ("
     <> ")" :: Query
 
 -------------- insert queries
-insertUserQuery = ("insert into users (first_name, second_name, team) values (?, ?, ?) returning id" :: Query,
+insertUserQuery = ("insert into users (first_name, second_name) values (?, ?) returning id" :: Query,
     "update users set first_name = (?), second_name = (?), team = (?) where id = (?)" :: Query)
 insertTeamQuery = ("insert into teams (name) values (?) returning id" :: Query,
     "update teams set name = (?) where id = (?)" :: Query)
@@ -71,6 +71,10 @@ deleteById conn q id = do
 
 selectAllBy :: FromRow q => Connection -> TL.Text -> Query -> IO [q]
 selectAllBy conn id q = query conn q (Only id)
+
+setSalary :: Connection -> User -> IO [Only Int]
+setSalary conn user = do
+    query conn "select set_salary(?)" $ Only $ getId user
 
 insertInto :: (ToRow r, HasId r) => Connection -> (Query, Query) -> r -> IO r
 insertInto conn (insert, update) item = 

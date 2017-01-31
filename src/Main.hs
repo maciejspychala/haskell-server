@@ -25,6 +25,7 @@ routes conn = do
     put "/users" $ do
         user <- jsonData :: ActionM User
         new <- liftIO (insertInto conn insertUserQuery user)
+        liftIO (setSalary conn new)
         ret new
     get "/users/:id" $ do
         id <- param "id" :: ActionM TL.Text
