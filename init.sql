@@ -125,3 +125,23 @@ insert into user_team (userid, teamid) values
 (4, 5),
 (5, 2),
 (6, 1);
+
+
+
+CREATE OR REPLACE FUNCTION year_salary(in userid integer) RETURNS real AS $$
+DECLARE
+sal real;
+tax real;
+BEGIN
+    SELECT salary into sal from users where id = userid;
+    sal := 12 * sal;
+    if (sal > 50000)
+        then 
+        tax := 0.442;
+    else
+        tax := 0.221;
+    end if; 
+    RETURN sal*(1-tax);
+END;
+$$
+LANGUAGE 'plpgsql' IMMUTABLE;
