@@ -33,7 +33,6 @@ executable haskellserver
                        text >=1.2,
                        aeson,
                        bytestring,
-                       sqlite-simple,
                        transformers,
                        postgresql-simple,
                        postgresql-libpq,
