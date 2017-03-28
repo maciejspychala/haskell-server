@@ -113,12 +113,11 @@ routes conn = do
 
 
 main = do
-    x <- readFile "credentials.safe"
-    let [username,  password, portString] = words x
-        port = read portString :: Int
-    let resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE"], corsRequestHeaders = ["content-type", "origin"] } 
-    conn <- connectPostgreSQL ("host='95.85.47.237' user='" <> (BS.pack username) <> 
-        "' dbname='maciek' password='" <> (BS.pack password) <> "'")
-    scotty port $ do
-        middleware $ cors (const $ Just resourcePolicy)
-        routes conn
+  [server, serverPort, dbname, username, password, portString] <- fmap words $ readFile "credentials.safe"
+  let port = read portString :: Int
+      resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE"], corsRequestHeaders = ["content-type", "origin"] } 
+  conn <- connectPostgreSQL ("host='" <> (BS.pack server) <> "' port='" <> (BS.pack serverPort) <> "' user='" <> (BS.pack username) <> 
+        "' dbname='" <> (BS.pack dbname) <> "' password='" <> (BS.pack password) <> "'")
+  scotty port $ do
+    middleware $ cors (const $ Just resourcePolicy)
+    routes conn
