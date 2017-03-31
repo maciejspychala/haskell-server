@@ -12,10 +12,12 @@ import Typeclasses
 import Types
 import DB
 import Network.Wai.Middleware.Cors
+import Control.Monad.Trans.Maybe
+import Control.Monad
+import Control.Monad.Trans.Class
+import Control.Exception
 
-ret x = do
-    json x
-    
+ret x = json x
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -111,13 +113,41 @@ routes conn = do
         ret checklist
 
 
+getCredentials :: String -> Maybe (String, String, String, String, String, Int)
+getCredentials str = return (lines str) >>= \conf -> case conf of
+  [a, b, c, d, e, f] -> return (a, b, c, d, e, read f)
+  _ -> Nothing
 
+connStringFromCredentials :: (String, String, String, String, String, Int) -> Maybe BS.ByteString
+connStringFromCredentials (server, serverPort, dbname, username, password, portString) =
+  return $ ("host='" <> (BS.pack server) <> "' port='" <> (BS.pack serverPort)
+             <> "' user='" <> (BS.pack username) <> "' dbname='" <> (BS.pack dbname)
+             <> "' password='" <> (BS.pack password) <> "'")
+
+createConnection :: BS.ByteString -> Maybe (IO Connection)
+createConnection connStr = return $ connectPostgreSQL connStr
+
+startServer :: IO Connection -> CorsResourcePolicy -> Int -> IO ()
+startServer ioconn resourcePolicy port = ioconn >>= \conn -> scotty port $ do
+  middleware $ cors (const $ Just resourcePolicy)
+  routes $ conn
+
+maybeEither e = case e of
+  Left _ -> Nothing
+  Right m -> Just m
+
+main :: IO ()
 main = do
-  [server, serverPort, dbname, username, password, portString] <- fmap words $ readFile "credentials.safe"
-  let port = read portString :: Int
-      resourcePolicy = simpleCorsResourcePolicy { corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE"], corsRequestHeaders = ["content-type", "origin"] } 
-  conn <- connectPostgreSQL ("host='" <> (BS.pack server) <> "' port='" <> (BS.pack serverPort) <> "' user='" <> (BS.pack username) <> 
-        "' dbname='" <> (BS.pack dbname) <> "' password='" <> (BS.pack password) <> "'")
-  scotty port $ do
-    middleware $ cors (const $ Just resourcePolicy)
-    routes conn
+  config <- fmap maybeEither (try $ readFile "credentials.safe" :: IO (Either IOException String))
+  
+  let resourcePolicy = simpleCorsResourcePolicy {
+        corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE"],
+        corsRequestHeaders = ["content-type", "origin"]
+        }
+        
+      connDetails = config >>= getCredentials >>= \c@(_, _, _, _, _, port) ->
+        connStringFromCredentials c >>= createConnection >>= (\x -> return (x, port))
+
+  case connDetails of
+    Just (conn, port) -> startServer conn resourcePolicy port
+    Nothing -> putStrLn "Error: Couldn't create connection" >> return ()
