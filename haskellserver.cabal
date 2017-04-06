@@ -37,4 +37,30 @@ executable haskellserver
                        postgresql-simple,
                        postgresql-libpq,
                        time,
-                       wai-cors
+                       wai-cors,
+                       jose,
+                       haskellserver
+
+library
+    hs-source-dirs:      lib
+    default-language:    Haskell2010
+    exposed-modules:     Auth
+    build-depends:       base,
+                         aeson,
+                         bytestring,
+                         jose,
+                         transformers,
+                         MonadRandom,
+                         mtl,
+                         lens,
+                         text
+
+test-suite auth-test
+    type:                exitcode-stdio-1.0
+    hs-source-dirs:      test
+    main-is:             AuthTest.hs
+    build-depends:       base,
+                         haskellserver
+    ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+    default-language:    Haskell2010
+                        

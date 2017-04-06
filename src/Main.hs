@@ -11,6 +11,7 @@ import qualified Data.ByteString.Lazy.Char8 as LBS
 import Typeclasses
 import Types
 import DB
+import Auth
 import Network.Wai.Middleware.Cors
 import Control.Monad.Trans.Maybe
 import Control.Monad
