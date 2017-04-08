@@ -150,4 +150,4 @@ main = do
 
   case connDetails of
     Just (conn, port) -> startServer conn resourcePolicy port
-    Nothing -> putStrLn "Error: Couldn't create connection" >> return ()
+    Nothing -> putStrLn "Error: Couldn't create connection"
