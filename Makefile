@@ -1,3 +1,2 @@
 build:
-	cabal haddock --executable
-	stack build
+	stack haddock
