@@ -55,6 +55,7 @@ getChecklistByOwner = "select id, task from checklists where task = (?)" :: Quer
 getUserSalaryById = "select year_salary(?)" :: Query
 whereTeam = " where team = (?)" :: Query
 
+-- | returns Just value if there is a head or Nothing when array is empty
 safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead xs = Just $ head xs
