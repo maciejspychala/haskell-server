@@ -30,6 +30,8 @@ getTaskQueryById = allTasksQuery <> whereId
 getTeamQueryById = allTeamsQuery <> whereId
 getEventQueryById = allEventsQuery <> whereId
 
+checkCredentialsQuery = "select count(*) from users where login = (?) and password = (?)" :: Query
+
 teamUsersQuery = "select id, first_name, last_name from users where id in ("
     <> "select userId from user_team where teamId = (?)"
     <> ")" :: Query
@@ -64,6 +66,9 @@ selectAll = query_
 
 selectById :: FromRow q => Connection -> TL.Text -> Query -> IO (Maybe q)
 selectById conn id q = safeHead <$> selectAllBy conn id q
+
+checkValVal :: Connection -> TL.Text -> TL.Text -> Query -> IO (Only Int)
+checkValVal conn v1 v2 q = fmap head $ query conn q (v1, v2)
 
 deleteById :: Connection -> Query -> TL.Text -> IO Int64
 deleteById conn q id = do

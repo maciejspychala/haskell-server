@@ -22,18 +22,26 @@ import Network.Wai.Middleware.Cors
 import Typeclasses
 import Types
 import Web.Scotty
-
 ret x = json x
 
 routes :: Connection -> ScottyM ()
 routes conn = do
-    -- post "/login" $ do
-    --     u <- jsonData :: ActionM (Maybe Credentials)
-    --     Status $ case u of
-    --         Nothing -> status401
-    --         Just c -> do
-    --             status200
-    --     ret $ TL.pack "at least you tried"
+    post "/login" $ do
+        u <- jsonData :: ActionM (Maybe Credentials)
+        let mu = MaybeT . return $ u :: MaybeT IO Credentials
+        retStatus <- liftIO $ runMaybeT $ do
+          credentials <- mu
+          lift $ print credentials
+          logUserIn conn credentials
+        case retStatus of
+          Nothing -> status status401
+          Just token -> do
+            ret token
+            status status200
+            
+        -- liftIO $ runMaybeT $ do
+        --   l <- logUserIn conn u
+        --   lift $ status200
     get "/users" $ do
         users <- liftIO $ getUsers conn
         ret users

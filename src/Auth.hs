@@ -1,11 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Auth (
-    readJWK,
-    signUser,
-    verifyUser,
-    ) where
+module Auth
+  -- (
+  --   readJWK,
+  --   signUser,
+  --   verifyUser
+    -- )
+where
 
 import Crypto.JWT
 import Crypto.JOSE.JWK
@@ -55,9 +57,15 @@ verifyUser jwk token aud = do
 data Credentials = Credentials {
     login :: String,
     password :: String
-} deriving (Show, Generic) 
+} deriving (Show, Generic)
 
 instance FromJSON Credentials where
     parseJSON (Object v) = Credentials <$>
         v .: "login" <*>
         v .: "password"
+
+data Token = Token {
+  token :: String
+} deriving (Show, Generic)
+
+instance ToJSON Token

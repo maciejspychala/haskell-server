@@ -14,10 +14,11 @@ module Api (
     putTask,
     getTaskChecklist,
     getEvents,
-    getEventbyId,
+    getEventById,
     putEvent,
     getChecklists,
-    putChecklist
+    putChecklist,
+    logUserIn
 ) where
 
 import Data.Text.Lazy as TL
@@ -28,6 +29,9 @@ import Database.PostgreSQL.Simple
 import Types
 import Config
 import Data.Int
+import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Class
+import Control.Monad
 
 getUsers :: Connection -> IO [User]
 getUsers conn = getWithArray conn allUsersQuery
@@ -78,14 +82,21 @@ getTaskChecklist conn id = getWithArrayById conn id getChecklistByOwner
 getEvents :: Connection -> IO [Event]
 getEvents conn = selectAll conn allEventsQuery
 
-getEventById :: Connection -> TL.Text -> IO [Event]
+getEventById :: Connection -> TL.Text -> IO (Maybe Event)
 getEventById conn id = selectById conn id getEventQueryById
 
-putEvents :: Connection -> Event -> IO [Event]
-putEvents conn event = insertInto conn insertEventQuery event
+putEvent :: Connection -> Event -> IO Event
+putEvent conn event = insertInto conn insertEventQuery event
 
 getChecklists :: Connection -> IO [Checklist]
 getChecklists conn = getWithArray conn allChecklistsQuery
 
-putChecklist :: Connection -> IO Checklist
-putChecklist conn = insertChecklist conn checklist
+putChecklist :: Connection -> Checklist -> IO ()
+putChecklist conn checklist = insertChecklist conn checklist
+
+logUserIn :: Connection -> Credentials -> MaybeT IO Token
+logUserIn conn (Credentials user passwd) = do
+  ok <- lift $ fmap fromOnly $
+    checkValVal conn (TL.pack user) (TL.pack passwd) checkCredentialsQuery
+  guard (ok == 1)
+  return $ Token "toktok"
