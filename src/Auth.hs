@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Auth (
     readJWK,
     signUser,
-    verifyUser
+    verifyUser,
     ) where
 
 import Crypto.JWT
@@ -20,6 +23,8 @@ import Data.Maybe
 import Data.Either
 import Control.Lens
 import Control.Monad.State.Lazy
+import GHC.Generics
+import Types.Imports
 
 right :: Either a b -> b
 right (Right a) = a
@@ -46,3 +51,13 @@ verifyUser jwk token aud = do
     let aud' = fromString $ T.pack aud
         validation = (set jwtValidationSettingsAudiencePredicate (==aud')) $ defaultJWTValidationSettings
     runExceptT $ decodeCompact token >>= validateJWSJWT validation jwk
+
+data Credentials = Credentials {
+    login :: String,
+    password :: String
+} deriving (Show, Generic) 
+
+instance FromJSON Credentials where
+    parseJSON (Object v) = Credentials <$>
+        v .: "login" <*>
+        v .: "password"

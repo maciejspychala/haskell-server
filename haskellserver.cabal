@@ -12,20 +12,8 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable haskellserver
-  hs-source-dirs:      src
+  hs-source-dirs:      app
   main-is:             Main.hs
-  other-modules:       DB,
-                       Typeclasses,
-                       Types,
-                       Types.Checklist,
-                       Types.Event,
-                       Types.Imports,
-                       Types.Task,
-                       Types.Team,
-                       Types.Salary,
-                       Types.User,
-                       Types.Usergroup
-
   default-language:    Haskell2010
   other-extensions:    OverloadedStrings
   build-depends:       base >=4.8, 
@@ -39,13 +27,30 @@ executable haskellserver
                        time,
                        wai-cors,
                        jose,
+                       http-types,
                        haskellserver
 
 library
-    hs-source-dirs:      src/auth
+    hs-source-dirs:      src
     default-language:    Haskell2010
-    exposed-modules:     Auth
+    other-extensions:    OverloadedStrings
+    exposed-modules:     Auth,
+                         Api,
+                         Config,
+                         DB,
+                         Typeclasses
+                         Types,
+                         Types.Imports,
+                         Types.Checklist,
+                         Types.Event,
+                         Types.Salary,
+                         Types.Task,
+                         Types.Team,
+                         Types.User,
+                         Types.Usergroup
+
     build-depends:       base,
+                         scotty >=0.11,
                          aeson,
                          bytestring,
                          jose,
@@ -53,7 +58,11 @@ library
                          MonadRandom,
                          mtl,
                          lens,
-                         text
+                         text,
+                         postgresql-simple,
+                         postgresql-libpq,
+                         time,
+                         wai-cors
 
 test-suite auth-test
     type:                exitcode-stdio-1.0
