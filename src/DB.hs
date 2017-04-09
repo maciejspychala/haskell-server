@@ -17,7 +17,7 @@ import Control.Monad.IO.Class
 import Data.Int
 
 -------------- select all
-allUsersQuery = "select id, first_name, second_name from users" :: Query
+allUsersQuery = "select id, first_name, last_name from users" :: Query
 allTeamsQuery = "select id, name from teams" :: Query
 allTasksQuery = "select id, begin_date at time zone 'utc', end_date at time zone 'utc', team, description from tasks" :: Query
 allEventsQuery = "select id, name, creator from events" :: Query
@@ -30,13 +30,15 @@ getTaskQueryById = allTasksQuery <> whereId
 getTeamQueryById = allTeamsQuery <> whereId
 getEventQueryById = allEventsQuery <> whereId
 
-teamUsersQuery = "select id, first_name, second_name from users where id in ("
+checkCredentialsQuery = "select count(*) from users where login = (?) and password = (?)" :: Query
+
+teamUsersQuery = "select id, first_name, last_name from users where id in ("
     <> "select userId from user_team where teamId = (?)"
     <> ")" :: Query
 
 -------------- insert queries
-insertUserQuery = ("insert into users (first_name, second_name) values (?, ?) returning id" :: Query,
-    "update users set first_name = (?), second_name = (?), team = (?) where id = (?)" :: Query)
+insertUserQuery = ("insert into users (first_name, last_name) values (?, ?) returning id" :: Query,
+    "update users set first_name = (?), last_name = (?), team = (?) where id = (?)" :: Query)
 insertTeamQuery = ("insert into teams (name) values (?) returning id" :: Query,
     "update teams set name = (?) where id = (?)" :: Query)
 insertTaskQuery = ("insert into tasks (begin_date, end_date, team, description) values (?, ?, ?, ?) returning id" :: Query,
@@ -65,6 +67,9 @@ selectAll = query_
 
 selectById :: FromRow q => Connection -> TL.Text -> Query -> IO (Maybe q)
 selectById conn id q = safeHead <$> selectAllBy conn id q
+
+checkValVal :: Connection -> TL.Text -> TL.Text -> Query -> IO (Only Int)
+checkValVal conn v1 v2 q = fmap head $ query conn q (v1, v2)
 
 deleteById :: Connection -> Query -> TL.Text -> IO Int64
 deleteById conn q id = do

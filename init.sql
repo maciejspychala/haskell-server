@@ -1,18 +1,20 @@
 create table users
 ( id bigserial primary key not null,
+    login varchar(80) unique,
+    password varchar(80) not null,
     first_name varchar(40) not null,
-    second_name varchar(40) not null,
+    last_name varchar(40) not null,
     team integer
 );
 
-insert into users (first_name, second_name, team) values
-('maciek', 'spychala', 1),
-('magda', 'siemiawska', 2),
-('marcin', 'chmiel', 3),
-('antoni', 'walewski', 4),
-('tomek', 'zoliborski', 2),
-('wieslaw', 'aramewicz', 3),
-('kasia', 'bolera', 2);
+insert into users (login, password, first_name, last_name, team) values
+('jamajczyk007', 'passwd', 'maciek', 'spychala', 1),
+('msiema', 'passwd', 'magda', 'siemiawska', 2),
+('mc', 'passwd', 'marcin', 'chmiel', 3),
+('awal', 'passwd', 'antoni', 'walewski', 4),
+('tomi', 'passwd', 'tomek', 'zoliborski', 2),
+('waram', 'passwd', 'wieslaw', 'aramewicz', 3),
+('cobol', 'passwd', 'kasia', 'bolera', 2);
 
 create table teams (
     id bigserial primary key not null,
@@ -37,7 +39,7 @@ CREATE TABLE "tasks" (
 ALTER TABLE "tasks" ADD CONSTRAINT "fk_task__team" FOREIGN KEY ("team") REFERENCES "teams" ("id");
 
 
-insert into tasks (priority, importance, begin_date, end_date, description, team) values
+insert into tasks (begin_date, end_date, description, team) values
 ('2017-01-13', '2017-01-16', 'make login page', 1),
 ('2017-01-15', '2017-01-26', 'refactor code', 2),
 ('2017-01-16', '2017-01-22', 'prepare mockups', 3),
