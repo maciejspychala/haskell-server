@@ -32,6 +32,8 @@ import Data.Int
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Class
 import Control.Monad
+import Data.Either
+import Data.ByteString.Lazy.Char8 as L
 
 getUsers :: Connection -> IO [User]
 getUsers conn = getWithArray conn allUsersQuery
@@ -99,4 +101,8 @@ logUserIn conn (Credentials user passwd) = do
   ok <- lift $ fmap fromOnly $
     checkValVal conn (TL.pack user) (TL.pack passwd) checkCredentialsQuery
   guard (ok == 1)
-  return $ Token "toktok"
+  jwk <- lift $ readJWK "key.json"
+  signed <- lift $ signUser jwk user
+  guard (isRight signed)
+  let Right token = signed
+  return $ Token $ L.unpack token
