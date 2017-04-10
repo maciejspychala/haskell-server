@@ -18,10 +18,12 @@ module Api (
     putEvent,
     getChecklists,
     putChecklist,
-    logUserIn
+    logUserIn,
+    authorizeUser,
+    authorize
 ) where
 
-import Data.Text.Lazy as TL
+import qualified Data.Text.Lazy as TL
 import Data.Monoid ((<>))
 import Auth
 import DB
@@ -33,7 +35,10 @@ import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Class
 import Control.Monad
 import Data.Either
-import Data.ByteString.Lazy.Char8 as L
+import qualified Data.ByteString.Lazy.Char8 as L
+import Web.Scotty
+import Control.Monad.IO.Class
+import Network.HTTP.Types.Status
 
 getUsers :: Connection -> IO [User]
 getUsers conn = getWithArray conn allUsersQuery
@@ -106,3 +111,21 @@ logUserIn conn (Credentials user passwd) = do
   guard (isRight signed)
   let Right token = signed
   return $ Token $ L.unpack token
+
+authorizeUser :: Maybe TL.Text -> MaybeT IO String
+authorizeUser auth' = do
+  auth <- MaybeT . return $ fmap TL.unpack auth'
+  let token = L.pack . unwords . tail . words $ auth
+  jwk <- lift $ readJWK "key.json"
+  verified <- lift $ verifyUser jwk token ""
+  guard (isRight verified)
+  return "stub"
+
+authorize :: ActionM () -> ActionM ()
+authorize success = do
+  auth <- header (TL.pack "Authorization") :: ActionM (Maybe TL.Text)
+  r <- liftIO $ runMaybeT $ do
+      authorizeUser auth
+  case r of
+    Nothing -> status status401
+    Just c -> success

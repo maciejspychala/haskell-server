@@ -2,11 +2,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Auth
-  -- (
-  --   readJWK,
-  --   signUser,
-  --   verifyUser
-    -- )
 where
 
 import Crypto.JWT
@@ -27,6 +22,7 @@ import Control.Lens
 import Control.Monad.State.Lazy
 import GHC.Generics
 import Types.Imports
+import Data.Time.Clock
 
 right :: Either a b -> b
 right (Right a) = a
@@ -39,19 +35,21 @@ readJWK fname = do
 
 signUser :: JWK -> String -> IO (Either Error ByteString)
 signUser jwk user = do 
+    time <- getCurrentTime
     let alg = JWSAlg RS256
         header = newJWSHeader (Protected, RS256)
         issuer = fromString . T.pack $ "mewa@github.com"
         audience = Audience [fromString . T.pack $ user]
         claims = (set claimAud (Just audience)) 
             . (set claimIss (Just issuer)) 
+            . (set claimIat (Just $ NumericDate time))
             $ emptyClaimsSet
     runExceptT $ createJWSJWT jwk header claims >>= encodeCompact
 
 verifyUser :: JWK -> ByteString -> String -> IO (Either JWTError ())
 verifyUser jwk token aud = do 
     let aud' = fromString $ T.pack aud
-        validation = (set jwtValidationSettingsAudiencePredicate (==aud')) $ defaultJWTValidationSettings
+        validation = (set jwtValidationSettingsAudiencePredicate (/= "")) $ defaultJWTValidationSettings
     runExceptT $ decodeCompact token >>= validateJWSJWT validation jwk
 
 data Credentials = Credentials {
@@ -69,3 +67,8 @@ data Token = Token {
 } deriving (Show, Generic)
 
 instance ToJSON Token
+
+data Authorization = Authorization {
+  name :: String,
+  permissions :: [String]
+} deriving (Show, Generic)

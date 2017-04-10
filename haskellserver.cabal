@@ -62,7 +62,8 @@ library
                          postgresql-simple,
                          postgresql-libpq,
                          time,
-                         wai-cors
+                         wai-cors,
+                         http-types
 
 test-suite auth-test
     type:                exitcode-stdio-1.0
