@@ -1,3 +1,6 @@
+{-|
+Module exporting DB object types used throughout application
+-}
 module Types (
     module Types.Team,
     module Types.Task,

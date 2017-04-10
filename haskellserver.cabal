@@ -36,6 +36,11 @@ library
     other-extensions:    OverloadedStrings
     exposed-modules:     Auth,
                          Api,
+                         Api.Users,
+                         Api.Teams,
+                         Api.Tasks,
+                         Api.Events,
+                         Api.Auth,
                          Config,
                          DB,
                          Typeclasses

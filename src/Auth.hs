@@ -1,6 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+This module contains functions used for creation and validation of JWT tokens
+-}
 module Auth
 where
 
@@ -28,11 +31,18 @@ right :: Either a b -> b
 right (Right a) = a
 right (Left a) = error "right: Unexpected Left"
 
+
+{-|
+Reads JWK from file at given path
+-}
 readJWK :: String -> IO JWK
 readJWK fname = do
     str <- L.readFile fname
     return $ fromMaybe (error "Error while creating JWK") . decode $ str
 
+{-|
+Signs standard app JWS claims and returns encoded JWT token
+-}
 signUser :: JWK -> String -> IO (Either Error ByteString)
 signUser jwk user = do 
     time <- getCurrentTime
@@ -46,12 +56,18 @@ signUser jwk user = do
             $ emptyClaimsSet
     runExceptT $ createJWSJWT jwk header claims >>= encodeCompact
 
+{-|
+Verifies JWT token using given JWK
+-}
 verifyUser :: JWK -> ByteString -> String -> IO (Either JWTError ())
 verifyUser jwk token aud = do 
     let aud' = fromString $ T.pack aud
         validation = (set jwtValidationSettingsAudiencePredicate (/= "")) $ defaultJWTValidationSettings
     runExceptT $ decodeCompact token >>= validateJWSJWT validation jwk
 
+{-|
+Record representing credentials used to log in
+-}
 data Credentials = Credentials {
     login :: String,
     password :: String
@@ -62,6 +78,9 @@ instance FromJSON Credentials where
         v .: "login" <*>
         v .: "password"
 
+{-|
+Record representing return response JWT tokens
+-}
 data Token = Token {
   token :: String
 } deriving (Show, Generic)
