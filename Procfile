@@ -1,1 +1,1 @@
-web: stack exec haskellserver
+web: haskellserver
