@@ -138,7 +138,7 @@ maybeEither e = case e of
 
 main :: IO ()
 main = do
-  p <- fmap head getArgs
+  p <- fmap (read . head) getArgs
   print p
   config <- fmap maybeEither (try $ readFile "credentials.safe" :: IO (Either IOException String))
   
