@@ -23,6 +23,7 @@ import Typeclasses
 import Types
 import Web.Scotty
 import Data.Either
+import System.Environment
 
 ret x = json x
 
@@ -137,6 +138,8 @@ maybeEither e = case e of
 
 main :: IO ()
 main = do
+  p <- fmap head getArgs
+  print p
   config <- fmap maybeEither (try $ readFile "credentials.safe" :: IO (Either IOException String))
   
   let resourcePolicy = simpleCorsResourcePolicy {
@@ -148,7 +151,7 @@ main = do
         connStringFromCredentials c >>= createConnection >>= (\x -> return (x, port))
 
   case connDetails of
-    Just (conn, port) -> startServer conn resourcePolicy port routes
+    Just (conn, port) -> startServer conn resourcePolicy p routes
     Nothing -> putStrLn "Error: Couldn't create connection" >> return ()
   return ()
 

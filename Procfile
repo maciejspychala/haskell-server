@@ -1,1 +1,1 @@
-web: ./app/.local/bin/haskellserver
+web: $HOME/.local/bin/haskellserver $PORT
