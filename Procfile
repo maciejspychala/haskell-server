@@ -1,1 +1,1 @@
-web: /app/.local/bin/haskellserver
+web: ./app/.local/bin/haskellserver
