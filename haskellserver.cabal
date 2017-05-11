@@ -19,6 +19,7 @@ executable haskellserver
   build-depends:       base >=4.8, 
                        scotty >=0.11,
                        text >=1.2,
+                       mtl,
                        aeson,
                        bytestring,
                        transformers,
@@ -73,10 +74,12 @@ library
 test-suite auth-test
     type:                exitcode-stdio-1.0
     hs-source-dirs:      test
-    main-is:             AuthTest.hs
+    main-is:             Spec.hs
     build-depends:       base,
                          bytestring,
-                         haskellserver
+                         haskellserver,
+                         hspec,
+                         mtl
     ghc-options:         -threaded -rtsopts -with-rtsopts=-N
     default-language:    Haskell2010
 

@@ -3,10 +3,11 @@
 Module containing helper functions for initialization &  setting the server up and running
 -}
 module Config(
-    getCredentials,
-    connStringFromCredentials,
+    getConfig,
     createConnection,
-    startServer
+    startServer,
+    Config, dbHost, dbPort, dbName, dbUser, dbPassword, serverPort, connection,
+    initConnection
 ) where
 
 import Data.Monoid ((<>))
@@ -15,34 +16,68 @@ import Web.Scotty
 import Database.PostgreSQL.Simple
 import Network.Wai.Middleware.Cors
 import qualified Data.ByteString.Char8 as BS
+import Control.Monad.Reader
+import Control.Monad.Trans.Maybe
+
+data Config = Config {
+  dbHost :: String,
+  dbPort :: String,
+  dbName :: String,
+  dbUser :: String,
+  dbPassword :: String,
+  serverPort :: Int,
+  connection :: Maybe Connection
+}
 
 {-|
 Reads config from file at give path
 -}
-getCredentials :: String -> Maybe (String, String, String, String, String, Int)
-getCredentials str = return (lines str) >>= \conf -> case conf of
-  [a, b, c, d, e, f] -> return (a, b, c, d, e, read f)
-  _ -> Nothing
+getConfig :: String -> MaybeT IO Config
+getConfig path = (liftIO $ readFile path) >>= parseConfig
+
+{-|
+Parses config string
+-}
+parseConfig :: String -> MaybeT IO Config
+parseConfig str = return (lines str) >>= \conf ->
+    case conf of
+      [a, b, c, d, e, f] -> return $ Config {dbHost = a, dbPort = b, dbName = c, dbUser = d, dbPassword = e, serverPort = read f, connection = Nothing }
+      _ -> MaybeT . return $ Nothing
 
 {-|
 Creates DB connection string used for connecting to DB
 -}
-connStringFromCredentials :: (String, String, String, String, String, Int) -> Maybe BS.ByteString
-connStringFromCredentials (server, serverPort, dbname, username, password, portString) =
-  return $ ("host='" <> (BS.pack server) <> "' port='" <> (BS.pack serverPort)
-             <> "' user='" <> (BS.pack username) <> "' dbname='" <> (BS.pack dbname)
-             <> "' password='" <> (BS.pack password) <> "'")
+connStringFromCredentialsT :: (Monad m) => ReaderT Config m BS.ByteString
+connStringFromCredentialsT = do
+    host <- BS.pack <$> asks dbHost
+    port <- BS.pack <$> asks dbPort
+    dbName <- BS.pack <$> asks dbName
+    user <- BS.pack <$> asks dbUser
+    pwd <- BS.pack <$> asks dbPassword
+    return $ ("host='" <> host <> "' port='" <> port
+             <> "' user='" <> user <> "' dbname='" <> dbName
+             <> "' password='" <> pwd <> "'")
+
+initConnection :: ReaderT Config IO Config
+initConnection = do
+    connStr <- connStringFromCredentialsT
+    port <- asks dbPort
+    conf <- ask
+    connection <- liftIO $ createConnection connStr
+    return conf { connection = Just connection }
 
 {-|
 Creates DB connection using given connection string
 -}
-createConnection :: BS.ByteString -> Maybe (IO Connection)
-createConnection connStr = return $ connectPostgreSQL connStr
+createConnection :: BS.ByteString -> (IO Connection)
+createConnection connStr = connectPostgreSQL connStr
 
 {-|
 Starts server with given DB connection, resource policy and routing
 -}
-startServer :: IO Connection -> CorsResourcePolicy -> Int -> (Connection -> ScottyM ()) -> IO ()
-startServer ioconn resourcePolicy port routes = ioconn >>= \conn -> scotty port $ do
-  middleware $ cors (const $ Just resourcePolicy)
-  routes $ conn
+startServer :: CorsResourcePolicy -> ScottyM () -> Reader Config (IO ())
+startServer resourcePolicy routes = do
+    port <- asks serverPort
+    return $ scotty port $ do
+        middleware $ cors (const $ Just resourcePolicy)
+        routes
