@@ -143,7 +143,7 @@ maybeEither e = case e of
 main :: IO ()
 main = do
   let resourcePolicy = simpleCorsResourcePolicy {
-      corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE"],
+      corsMethods = ["GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS"],
       corsRequestHeaders = ["content-type", "origin"]
   }
 
