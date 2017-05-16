@@ -4,6 +4,8 @@ Module containing helper functions for initialization &  setting the server up a
 -}
 module Config(
     getConfig,
+    parseConfig,
+    connStringFromCredentialsT,
     createConnection,
     startServer,
     Config, dbHost, dbPort, dbName, dbUser, dbPassword, serverPort, connection,
@@ -38,7 +40,7 @@ getConfig path = (liftIO $ readFile path) >>= parseConfig
 {-|
 Parses config string
 -}
-parseConfig :: String -> MaybeT IO Config
+parseConfig :: (Monad m) => String -> MaybeT m Config
 parseConfig str = return (lines str) >>= \conf ->
     case conf of
       [a, b, c, d, e, f] -> return $ Config {dbHost = a, dbPort = b, dbName = c, dbUser = d, dbPassword = e, serverPort = read f, connection = Nothing }
